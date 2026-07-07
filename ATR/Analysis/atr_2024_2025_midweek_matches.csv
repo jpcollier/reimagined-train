@@ -1,0 +1,16 @@
+segment_id_2024,base_id_2025,location_2024,location_2025,distance_m,text_score,direction_count,directions_2024,directions_2025,midweek_avg_2024,midweek_avg_2025,pct_change,days_2024,days_2025,records_2024,records_2025
+10P1,771427,1_ATR _9th Avenue SB between W 42nd St and W 43rd St,9 AVENUE between West 42 Street and West 43 Street,8.0,78.0,1,SB,SB,247.24,253.24,2.43,6,6,576,576
+11P1,771421,2_ATR_9th Avenue SB between 34th St and 33rd St,9 AVENUE between West 33 Street and West 34 Street,12.8,76.9,1,SB,SB,228.68,208.45,-8.85,6,6,576,576
+12P1,771434,3_ATR_East 61 Street between Lexington Ave and 3rd Ave,EAST 61 STREET between Lexington Avenue and 3 Avenue,6.7,95.8,1,WB,WB,62.34,57.67,-7.5,6,6,576,576
+15P1,771418,5_ATR_9th Avenue between W 22nd St and 23rd St,9 AVENUE between West 22 Street and West 23 Street,8.4,84.2,1,SB,SB,174.04,187.34,7.64,6,6,576,576
+1B3,771424,50_ATR_ East 34th Street between Lexington Ave and 3rd Ave,EAST 34 STREET between Lexington Avenue and 3 Avenue,8.1,88.0,1,EB,EB,96.46,75.01,-22.24,6,6,576,576
+1B6,771422,54_ATR_ West 34th Street_EB between 8th Ave and 9th Ave,WEST 34 STREET between 8 Avenue and 9 Avenue,11.5,76.9,1,EB,EB,79.99,84.13,5.17,6,6,576,576
+2A8,771407,52_ATR_West Houston Street between Wooster St and West Broadway,WEST HOUSTON STREET between Wooster Street and West Broadway,17.9,100.0,1,WB,EB,153.68,121.51,-20.93,6,6,576,576
+44P4,771400,44_ATR_FDR Dr Btwn Market Slip and Manhattan Bridge,F D R DRIVE between Fdr Drive Nb En Brooklyn Brdg and Manhattan Bridge Pedestrian Path,8.0,73.0,1,NB,EB,604.99,600.05,-0.82,12,6,1152,576
+46P2,771444,20_ATR_Queens Blvd between 39th St  and 39th Place,QUEENS BOULEVARD between 39 Street and 39 Place,8.9,95.8,1,WB,WB,132.01,133.37,1.03,6,6,576,576
+47P2,771445,21_ATR_Queens Blvd between 38th St and 39th St,QUEENS BOULEVARD between 38 Street and 39 Street,11.6,90.9,1,EB,EB,150.71,157.63,4.59,6,6,576,576
+49P2,771448,23_ATR_Ent from Van Dam Street and Van Dam Street,LIE WB ENTRANCE VAN DAM ST between Dead End and Van Dam Street,5.3,83.3,1,EB,EB,13.25,11.2,-15.52,6,6,576,576
+50P2,771442,24_ATR_Grand Central Parkway WB BQE,GRAND CENTRAL PARKWAY between Dead End and Dead end,15.4,83.7,1,WB,WB,1111.72,1052.84,-5.3,6,6,576,576
+51P2,771443,25_ATR_Grand Central Parkway EB BQE,GRAND CENTRAL PARKWAY between Dead End and Brooklyn Queens Expwy Et 42 Eb,25.4,91.3,1,EB,EB,1025.0,962.49,-6.1,6,6,576,576
+7P3A3B,771439,38_ATR_Henry Hudson Parkway Ramp,HENRY HUDSON PARKWAY between Henry Hudson Parkway Et 11 Sb and Dead end,25.9,87.2,1,NB,NB,638.2,586.7,-8.07,6,6,576,576
+9P3A3B,771438,41_ATR_Henry Hudson Parkway Ramp_1,HENRY HUDSON PARKWAY between Henry Hudson Parkway Et 11 Sb and Dead end,25.3,82.9,1,SB,SB,680.91,697.37,2.42,6,6,576,576
