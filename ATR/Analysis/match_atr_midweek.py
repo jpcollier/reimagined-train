@@ -58,14 +58,19 @@ def load_2024():
     df = pd.read_parquet(DATA / "2024_Traffic_Counts_ATR.parquet")
     df["day_name"] = pd.to_datetime(df["date"]).dt.day_name()
     df = df[df["day_name"].isin(MIDWEEK)].copy()
+    daily = (df.groupby(["segment_id", "date"], as_index=False)
+               .agg(daily_volume=("count", "sum")))
     loc = (df.groupby("segment_id")
         .agg(location_1=("location_1", "first"), location_2=("location_2", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
              directions=("direction_of_travel", lambda x: tuple(sorted(set(x.dropna())))),
              direction_count=("direction_of_travel", lambda x: x.dropna().nunique()),
-             days=("date", "nunique"), records=("count", "size"),
-             midweek_avg=("count", "mean"))
+             records=("count", "size"))
         .reset_index())
+    daily_stats = (daily.groupby("segment_id")
+                   .agg(days=("date", "nunique"), midweek_avg_daily_volume=("daily_volume", "mean"))
+                   .reset_index())
+    loc = loc.merge(daily_stats, on="segment_id", how="left")
     loc["label"] = loc["location_1"] + " " + loc["location_2"]
     loc["norm_label"] = loc["label"].map(norm)
     return loc
@@ -84,14 +89,19 @@ def load_2025():
     transformer = Transformer.from_crs("EPSG:2263", "EPSG:4326", always_xy=True)
     lon, lat = transformer.transform(df["x"].to_numpy(), df["y"].to_numpy())
     df["longitude"] = lon; df["latitude"] = lat
+    daily = (df.groupby(["base_id", "Date"], as_index=False)
+               .agg(daily_volume=("Volume", "sum")))
     loc = (df.groupby("base_id")
         .agg(street=("street", "first"), fromSt=("fromSt", "first"), toSt=("toSt", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
              directions=("Direction", lambda x: tuple(sorted(set(x.dropna())))),
              direction_count=("Direction", lambda x: x.dropna().nunique()),
-             days=("Date", "nunique"), records=("Volume", "size"),
-             midweek_avg=("Volume", "mean"))
+             records=("Volume", "size"))
         .reset_index())
+    daily_stats = (daily.groupby("base_id")
+                   .agg(days=("Date", "nunique"), midweek_avg_daily_volume=("daily_volume", "mean"))
+                   .reset_index())
+    loc = loc.merge(daily_stats, on="base_id", how="left")
     loc["label"] = loc["street"] + " between " + loc["fromSt"] + " and " + loc["toSt"]
     loc["norm_label"] = loc["label"].map(norm)
     return loc
@@ -122,9 +132,9 @@ def main():
                 "match_tier": match_tier,
                 "direction_count": int(a.direction_count),
                 "directions_2024": ";".join(a.directions), "directions_2025": ";".join(b.directions),
-                "midweek_avg_2024": round(a.midweek_avg, 2),
-                "midweek_avg_2025": round(b.midweek_avg, 2),
-                "pct_change": round((b.midweek_avg - a.midweek_avg) / a.midweek_avg * 100, 2),
+                "midweek_avg_daily_volume_2024": round(a.midweek_avg_daily_volume, 2),
+                "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
+                "pct_change": round((b.midweek_avg_daily_volume - a.midweek_avg_daily_volume) / a.midweek_avg_daily_volume * 100, 2),
                 "days_2024": int(a.days), "days_2025": int(b.days),
                 "records_2024": int(a.records), "records_2025": int(b.records),
             })
@@ -153,7 +163,7 @@ def main():
     OUT.mkdir(exist_ok=True)
     out.to_csv(OUT / "atr_2024_2025_midweek_matches.csv", index=False)
     print(f"Matched {len(out)} confident locations")
-    print(out[["segment_id_2024","base_id_2025","distance_m","text_score","midweek_avg_2024","midweek_avg_2025","pct_change"]].to_string(index=False))
+    print(out[["segment_id_2024","base_id_2025","distance_m","text_score","midweek_avg_daily_volume_2024","midweek_avg_daily_volume_2025","pct_change"]].to_string(index=False))
 
 if __name__ == "__main__":
     main()
