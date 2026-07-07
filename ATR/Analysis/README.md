@@ -17,7 +17,7 @@ This folder contains a reproducible match of the project ATR locations across 20
 - Creates `display_name` by stripping ATR prefixes from the 2024 label and applying readable capitalization for table display.
 - Includes map-ready `latitude` and `longitude` midpoint coordinates for each 2024-to-2025 match, plus year-specific coordinates for audit fields when available.
 - Considers a candidate match only when:
-  - the two records count the same number of directions; and
+  - the two records have the same counted direction set; and
   - the pair satisfies one of three confidence tiers: within 75 meters with text score at least 60, within 30 meters with text score at least 40, or within 12 meters with text score at least 35. These closer-distance tiers recover sites whose names use infrastructure descriptors such as `Dead End`, `Bike Path`, or route/ramp labels instead of cross-streets.
 - Keeps strict one-to-one match sets by selecting the highest confidence candidate on both sides. Confidence is the text score plus a small proximity bonus.
 - Uses 2024-to-2025 as the primary output universe, then left-joins one-to-one 2023-to-2024 matches onto those rows. This preserves all previously confident 2024-to-2025 locations while adding 2023 history where the 2023 data has a comparable site.
@@ -26,4 +26,4 @@ This folder contains a reproducible match of the project ATR locations across 20
 
 ## Result summary
 
-The matching process found 37 confident 2024-to-2025 locations. Of those, 20 also have matched 2023 history. The 2024-to-2025 percent changes range from -22.24% to +99.52%; among rows with 2023 history, 2023-to-2025 percent changes range from -20.16% to +75.03%.
+The matching process found 32 confident 2024-to-2025 locations. Of those, 15 also have matched 2023 history. The 2024-to-2025 percent changes range from -22.24% to +54.88%; among rows with 2023 history, 2023-to-2025 percent changes range from -20.16% to +70.77%.
