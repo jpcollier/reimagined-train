@@ -58,8 +58,9 @@ def load_2024():
     df = pd.read_parquet(DATA / "2024_Traffic_Counts_ATR.parquet")
     df["day_name"] = pd.to_datetime(df["date"]).dt.day_name()
     df = df[df["day_name"].isin(MIDWEEK)].copy()
-    daily = (df.groupby(["segment_id", "date"], as_index=False)
-               .agg(daily_volume=("count", "sum")))
+    df["hour"] = pd.to_datetime(df["start_time"].astype(str), format="%H:%M:%S").dt.hour
+    hourly = (df.groupby(["segment_id", "date", "hour"], as_index=False)
+                .agg(hourly_volume=("count", "sum")))
     loc = (df.groupby("segment_id")
         .agg(location_1=("location_1", "first"), location_2=("location_2", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
@@ -67,10 +68,16 @@ def load_2024():
              direction_count=("direction_of_travel", lambda x: x.dropna().nunique()),
              records=("count", "size"))
         .reset_index())
-    daily_stats = (daily.groupby("segment_id")
-                   .agg(days=("date", "nunique"), midweek_avg_daily_volume=("daily_volume", "mean"))
-                   .reset_index())
-    loc = loc.merge(daily_stats, on="segment_id", how="left")
+    days = (df.groupby("segment_id")
+              .agg(days=("date", "nunique"))
+              .reset_index())
+    hourly_avg = (hourly.groupby(["segment_id", "hour"], as_index=False)
+                  .agg(avg_hourly_volume=("hourly_volume", "mean")))
+    hourly_stats = (hourly_avg.groupby("segment_id")
+                    .agg(hours=("hour", "nunique"),
+                         midweek_avg_daily_volume=("avg_hourly_volume", "sum"))
+                    .reset_index())
+    loc = loc.merge(days, on="segment_id", how="left").merge(hourly_stats, on="segment_id", how="left")
     loc["label"] = loc["location_1"] + " " + loc["location_2"]
     loc["norm_label"] = loc["label"].map(norm)
     return loc
@@ -89,8 +96,8 @@ def load_2025():
     transformer = Transformer.from_crs("EPSG:2263", "EPSG:4326", always_xy=True)
     lon, lat = transformer.transform(df["x"].to_numpy(), df["y"].to_numpy())
     df["longitude"] = lon; df["latitude"] = lat
-    daily = (df.groupby(["base_id", "Date"], as_index=False)
-               .agg(daily_volume=("Volume", "sum")))
+    hourly = (df.groupby(["base_id", "Date", "Hour"], as_index=False)
+                .agg(hourly_volume=("Volume", "sum")))
     loc = (df.groupby("base_id")
         .agg(street=("street", "first"), fromSt=("fromSt", "first"), toSt=("toSt", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
@@ -98,10 +105,16 @@ def load_2025():
              direction_count=("Direction", lambda x: x.dropna().nunique()),
              records=("Volume", "size"))
         .reset_index())
-    daily_stats = (daily.groupby("base_id")
-                   .agg(days=("Date", "nunique"), midweek_avg_daily_volume=("daily_volume", "mean"))
-                   .reset_index())
-    loc = loc.merge(daily_stats, on="base_id", how="left")
+    days = (df.groupby("base_id")
+              .agg(days=("Date", "nunique"))
+              .reset_index())
+    hourly_avg = (hourly.groupby(["base_id", "Hour"], as_index=False)
+                  .agg(avg_hourly_volume=("hourly_volume", "mean")))
+    hourly_stats = (hourly_avg.groupby("base_id")
+                    .agg(hours=("Hour", "nunique"),
+                         midweek_avg_daily_volume=("avg_hourly_volume", "sum"))
+                    .reset_index())
+    loc = loc.merge(days, on="base_id", how="left").merge(hourly_stats, on="base_id", how="left")
     loc["label"] = loc["street"] + " between " + loc["fromSt"] + " and " + loc["toSt"]
     loc["norm_label"] = loc["label"].map(norm)
     return loc
@@ -136,6 +149,7 @@ def main():
                 "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
                 "pct_change": round((b.midweek_avg_daily_volume - a.midweek_avg_daily_volume) / a.midweek_avg_daily_volume * 100, 2),
                 "days_2024": int(a.days), "days_2025": int(b.days),
+                "hours_2024": int(a.hours), "hours_2025": int(b.hours),
                 "records_2024": int(a.records), "records_2025": int(b.records),
             })
     # Keep a strict one-to-one set: if records collide, retain the best
