@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Match 2024/2025 ATR count locations and compute midweek percent changes.
+"""Match 2023/2024/2025 ATR count locations and compute midweek percent changes.
 
 Midweek is Tuesday, Wednesday, and Thursday. Locations are matched only when
 nearby and textually similar, and when both years have the same number of
@@ -76,9 +76,10 @@ def haversine_m(lat1, lon1, lat2, lon2):
     return 2 * r * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
 
-def load_2024():
-    df = pd.read_parquet(DATA / "2024_Traffic_Counts_ATR.parquet")
-    df["day_name"] = pd.to_datetime(df["date"]).dt.day_name()
+def load_parquet_year(year: int):
+    df = pd.read_parquet(DATA / f"{year}_Traffic_Counts_ATR.parquet")
+    df["date"] = pd.to_datetime(df["date"])
+    df["day_name"] = df["date"].dt.day_name()
     df = df[df["day_name"].isin(MIDWEEK)].copy()
     df["hour"] = pd.to_datetime(df["start_time"].astype(str), format="%H:%M:%S").dt.hour
     hourly = (df.groupby(["segment_id", "date", "hour"], as_index=False)
@@ -102,6 +103,7 @@ def load_2024():
     loc = loc.merge(days, on="segment_id", how="left").merge(hourly_stats, on="segment_id", how="left")
     loc["label"] = loc["location_1"] + " " + loc["location_2"]
     loc["norm_label"] = loc["label"].map(norm)
+    loc["year"] = year
     return loc
 
 
@@ -139,14 +141,14 @@ def load_2025():
     loc = loc.merge(days, on="base_id", how="left").merge(hourly_stats, on="base_id", how="left")
     loc["label"] = loc["street"] + " between " + loc["fromSt"] + " and " + loc["toSt"]
     loc["norm_label"] = loc["label"].map(norm)
+    loc["year"] = 2025
     return loc
 
 
-def main():
-    y24, y25 = load_2024(), load_2025()
+def match_pair(left: pd.DataFrame, right: pd.DataFrame, left_key: str, right_key: str, left_out: str, right_out: str) -> pd.DataFrame:
     rows = []
-    for _, a in y24.iterrows():
-        for _, b in y25.iterrows():
+    for _, a in left.iterrows():
+        for _, b in right.iterrows():
             if int(a.direction_count) != int(b.direction_count):
                 continue
             dist = haversine_m(a.latitude, a.longitude, b.latitude, b.longitude)
@@ -161,52 +163,112 @@ def main():
             if match_tier is None:
                 continue
             rows.append({
-                "segment_id_2024": a.segment_id, "base_id_2025": int(b.base_id),
-                "display_name": display_label(a.label),
-                "location_2024": a.label, "location_2025": b.label,
-                "latitude": round((a.latitude + b.latitude) / 2, 6),
-                "longitude": round((a.longitude + b.longitude) / 2, 6),
-                "latitude_2024": round(a.latitude, 6),
-                "longitude_2024": round(a.longitude, 6),
-                "latitude_2025": round(b.latitude, 6),
-                "longitude_2025": round(b.longitude, 6),
+                left_out: a[left_key], right_out: b[right_key],
                 "distance_m": round(dist, 1), "text_score": round(score, 1),
                 "match_tier": match_tier,
-                "direction_count": int(a.direction_count),
-                "directions_2024": ";".join(a.directions), "directions_2025": ";".join(b.directions),
-                "midweek_avg_daily_volume_2024": round(a.midweek_avg_daily_volume, 2),
-                "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
-                "pct_change": round((b.midweek_avg_daily_volume - a.midweek_avg_daily_volume) / a.midweek_avg_daily_volume * 100, 2),
-                "days_2024": int(a.days), "days_2025": int(b.days),
-                "hours_2024": int(a.hours), "hours_2025": int(b.hours),
-                "records_2024": int(a.records), "records_2025": int(b.records),
+                "confidence": score + max(MAX_DISTANCE_M - dist, 0) / 10,
             })
-    # Keep a strict one-to-one set: if records collide, retain the best
-    # text/proximity candidate on both sides.
     candidates = pd.DataFrame(rows)
-    candidates["confidence"] = (
-        candidates["text_score"]
-        + (MAX_DISTANCE_M - candidates["distance_m"]).clip(lower=0) / 10
-    )
+    if candidates.empty:
+        return candidates
     selected = []
-    used_2024 = set()
-    used_2025 = set()
+    used_left = set()
+    used_right = set()
     for _, row in candidates.sort_values(
         ["confidence", "text_score", "distance_m"],
         ascending=[False, False, True],
     ).iterrows():
-        if row.segment_id_2024 in used_2024 or row.base_id_2025 in used_2025:
+        if row[left_out] in used_left or row[right_out] in used_right:
             continue
         selected.append(row)
-        used_2024.add(row.segment_id_2024)
-        used_2025.add(row.base_id_2025)
-    out = (pd.DataFrame(selected)
-             .sort_values(["segment_id_2024", "base_id_2025"])
-             .drop(columns=["confidence"]))
+        used_left.add(row[left_out])
+        used_right.add(row[right_out])
+    return pd.DataFrame(selected).drop(columns=["confidence"])
+
+
+def pct_change(new: float, old: float) -> float:
+    return round((new - old) / old * 100, 2)
+
+
+def main():
+    y23, y24, y25 = load_parquet_year(2023), load_parquet_year(2024), load_2025()
+
+    matches_24_25 = match_pair(y24, y25, "segment_id", "base_id", "segment_id_2024", "base_id_2025").rename(columns={
+        "distance_m": "distance_m_2024_2025",
+        "text_score": "text_score_2024_2025",
+        "match_tier": "match_tier_2024_2025",
+    })
+    matches_23_24 = match_pair(y23, y24, "segment_id", "segment_id", "segment_id_2023", "segment_id_2024").rename(columns={
+        "distance_m": "distance_m_2023_2024",
+        "text_score": "text_score_2023_2024",
+        "match_tier": "match_tier_2023_2024",
+    })
+
+    joined = matches_24_25.merge(matches_23_24, on="segment_id_2024", how="left")
+    y23_lookup = y23.set_index("segment_id")
+    y24_lookup = y24.set_index("segment_id")
+    y25_lookup = y25.set_index("base_id")
+
+    rows = []
+    for _, m in joined.iterrows():
+        a = y24_lookup.loc[m.segment_id_2024]
+        b = y25_lookup.loc[m.base_id_2025]
+        row = {
+            "segment_id_2023": m.segment_id_2023 if pd.notna(m.segment_id_2023) else "",
+            "segment_id_2024": m.segment_id_2024,
+            "base_id_2025": int(m.base_id_2025),
+            "display_name": display_label(a.label),
+            "location_2023": "",
+            "location_2024": a.label,
+            "location_2025": b.label,
+            "latitude": round((a.latitude + b.latitude) / 2, 6),
+            "longitude": round((a.longitude + b.longitude) / 2, 6),
+            "latitude_2024": round(a.latitude, 6),
+            "longitude_2024": round(a.longitude, 6),
+            "latitude_2025": round(b.latitude, 6),
+            "longitude_2025": round(b.longitude, 6),
+            "distance_m_2024_2025": m.distance_m_2024_2025,
+            "text_score_2024_2025": m.text_score_2024_2025,
+            "match_tier_2024_2025": m.match_tier_2024_2025,
+            "distance_m_2023_2024": m.distance_m_2023_2024 if pd.notna(m.segment_id_2023) else "",
+            "text_score_2023_2024": m.text_score_2023_2024 if pd.notna(m.segment_id_2023) else "",
+            "match_tier_2023_2024": m.match_tier_2023_2024 if pd.notna(m.segment_id_2023) else "",
+            "direction_count": int(a.direction_count),
+            "directions_2024": ";".join(a.directions),
+            "directions_2025": ";".join(b.directions),
+            "midweek_avg_daily_volume_2023": "",
+            "midweek_avg_daily_volume_2024": round(a.midweek_avg_daily_volume, 2),
+            "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
+            "pct_change_2024_2025": pct_change(b.midweek_avg_daily_volume, a.midweek_avg_daily_volume),
+            "pct_change_2023_2024": "",
+            "pct_change_2023_2025": "",
+            "days_2023": "", "days_2024": int(a.days), "days_2025": int(b.days),
+            "hours_2023": "", "hours_2024": int(a.hours), "hours_2025": int(b.hours),
+            "records_2023": "", "records_2024": int(a.records), "records_2025": int(b.records),
+        }
+        if pd.notna(m.segment_id_2023):
+            c = y23_lookup.loc[m.segment_id_2023]
+            row.update({
+                "location_2023": c.label,
+                "latitude_2023": round(c.latitude, 6),
+                "longitude_2023": round(c.longitude, 6),
+                "directions_2023": ";".join(c.directions),
+                "midweek_avg_daily_volume_2023": round(c.midweek_avg_daily_volume, 2),
+                "pct_change_2023_2024": pct_change(a.midweek_avg_daily_volume, c.midweek_avg_daily_volume),
+                "pct_change_2023_2025": pct_change(b.midweek_avg_daily_volume, c.midweek_avg_daily_volume),
+                "days_2023": int(c.days), "hours_2023": int(c.hours), "records_2023": int(c.records),
+            })
+        else:
+            row.update({"latitude_2023": "", "longitude_2023": "", "directions_2023": ""})
+        rows.append(row)
+
+    out = pd.DataFrame(rows).sort_values(["segment_id_2024", "base_id_2025"])
     OUT.mkdir(exist_ok=True)
+    out.to_csv(OUT / "atr_2023_2024_2025_midweek_matches.csv", index=False)
     out.to_csv(OUT / "atr_2024_2025_midweek_matches.csv", index=False)
-    print(f"Matched {len(out)} confident locations")
-    print(out[["segment_id_2024","base_id_2025","distance_m","text_score","midweek_avg_daily_volume_2024","midweek_avg_daily_volume_2025","pct_change"]].to_string(index=False))
+    matched_2023 = out["segment_id_2023"].astype(bool).sum()
+    print(f"Matched {len(out)} confident 2024-2025 locations; {matched_2023} include 2023 history")
+    print(out[["segment_id_2023", "segment_id_2024", "base_id_2025", "midweek_avg_daily_volume_2023", "midweek_avg_daily_volume_2024", "midweek_avg_daily_volume_2025", "pct_change_2023_2024", "pct_change_2024_2025", "pct_change_2023_2025"]].to_string(index=False))
 
 if __name__ == "__main__":
     main()
