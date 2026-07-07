@@ -2,8 +2,8 @@
 """Match 2023/2024/2025 ATR count locations and compute midweek percent changes.
 
 Midweek is Tuesday, Wednesday, and Thursday. Locations are matched only when
-nearby and textually similar, and when both years have the same number of
-counted directions.
+nearby and textually similar, and when both years have the same counted
+directions.
 """
 from __future__ import annotations
 
@@ -150,6 +150,8 @@ def match_pair(left: pd.DataFrame, right: pd.DataFrame, left_key: str, right_key
     for _, a in left.iterrows():
         for _, b in right.iterrows():
             if int(a.direction_count) != int(b.direction_count):
+                continue
+            if tuple(a.directions) != tuple(b.directions):
                 continue
             dist = haversine_m(a.latitude, a.longitude, b.latitude, b.longitude)
             score = fuzz.token_set_ratio(a.norm_label, b.norm_label)
