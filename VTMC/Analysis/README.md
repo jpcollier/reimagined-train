@@ -10,7 +10,7 @@ This folder contains a reproducible match of the project VTMC locations from 202
 ## Method
 
 - Defines **midweek** as Tuesday, Wednesday, and Thursday.
-- Aggregates away all vehicle `class` and turning-movement `direction` detail before computing volumes. These fields are not used for matching and are not retained in the output.
+- Limits the inputs to comparable motor-vehicle classes and left/through/right movement records before computing volumes. This removes non-comparable 2024-only pedestrian/bicycle/moped records and 2024 U-turn/pedestrian-crossing movement records. The class and turning-movement fields are then aggregated away, are not used for matching, and are not retained in the output.
 - Normalizes street text by lowercasing, removing location number prefixes and survey-day suffixes, and standardizing common street suffixes/directions.
 - Creates `display_name` from the 2024 location fields with readable capitalization for table display.
 - Includes map-ready `latitude` and `longitude` midpoint coordinates for each match, plus year-specific coordinates for audit fields.
@@ -20,4 +20,4 @@ This folder contains a reproducible match of the project VTMC locations from 202
 
 ## Result summary
 
-The matching process found 29 confident locations. Percent changes range from -91.90% to -13.70%.
+The matching process found 29 confident locations. Percent changes range from -21.70% to +62.69%.

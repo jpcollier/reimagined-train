@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Match 2024/2025 VTMC count locations and compute midweek percent changes.
 
-Midweek is Tuesday, Wednesday, and Thursday. Vehicle class and turning-movement
-(direction) fields are intentionally aggregated away and are not used for
-matching or retained in the output.
+Midweek is Tuesday, Wednesday, and Thursday. To keep the two years comparable,
+the input is first limited to common motor-vehicle count categories and
+left/through/right movement records, then those fields are aggregated away and
+are not used for matching or retained in the output.
 """
 from __future__ import annotations
 
@@ -19,6 +20,19 @@ DATA = ROOT / "VTMC" / "Data"
 OUT = ROOT / "VTMC" / "Analysis"
 
 MIDWEEK = {"Tuesday", "Wednesday", "Thursday"}
+# Comparable motor-vehicle classes only. 2024 includes pedestrians, bicycles,
+# mopeds, and separate truck classes that are not one-to-one with 2025. 2025
+# includes a broader CV/Truck split. These sets keep the shared motor-vehicle
+# universe without carrying class detail into the analysis output.
+COMPARABLE_CLASSES = {
+    2024: {
+        "Motorcycles", "Auto", "Yellow Taxi Cabs",
+        "2-axle,4-tire pickup,vans,motor", "Single Unit Trucks",
+        "Articulated Trucks", "Busses", "Green NYC Taxi",
+    },
+    2025: {"Motorcycles", "Auto", "Yellow Taxi", "CV", "Truck", "Bus", "Green Taxi"},
+}
+COMPARABLE_MOVEMENTS = {"L", "T", "R"}
 MAX_DISTANCE_M = 100
 MIN_TEXT_SCORE = 55
 CLOSE_DISTANCE_M = 40
@@ -76,10 +90,16 @@ def load_year(year: int) -> pd.DataFrame:
     df = pd.read_parquet(DATA / f"{year}_Traffic_Counts_VTMC.parquet")
     df["date_for_analysis"] = pd.to_datetime(df[date_col])
     df["day_name"] = df["date_for_analysis"].dt.day_name()
-    df = df[df["day_name"].isin(MIDWEEK)].copy()
+    movement = df["direction"].astype(str).str.extract(r"\b([LTR])$", expand=False)
+    df = df[
+        df["day_name"].isin(MIDWEEK)
+        & df["class"].isin(COMPARABLE_CLASSES[year])
+        & movement.isin(COMPARABLE_MOVEMENTS)
+    ].copy()
     df["hour"] = pd.to_datetime(df["start_time"].astype(str), format="%H:%M:%S").dt.hour
 
-    # Aggregate across every class and turning movement before computing volumes.
+    # Aggregate across the comparable class and turning-movement fields before
+    # computing volumes; neither field is retained in the location output.
     hourly = (df.groupby(["node_id", "date_for_analysis", "hour"], as_index=False)
                 .agg(hourly_volume=("count", "sum")))
     loc = (df.groupby("node_id")
