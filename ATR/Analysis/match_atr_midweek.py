@@ -45,6 +45,28 @@ def norm(s: object) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def display_label(label: object) -> str:
+    """Create a compact human-readable location label for tables."""
+    text = "" if pd.isna(label) else str(label)
+    text = re.sub(r"^\s*\d+\s*_\s*ATR\s*_?", "", text, flags=re.IGNORECASE)
+    text = text.replace("_", " ")
+    text = re.sub(r"\bBtwn\b", "between", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip(" -")
+    titled = text.title()
+    titled = re.sub(r"(\d+)(St|Nd|Rd|Th)\b", lambda m: m.group(1) + m.group(2).lower(), titled)
+    replacements = {
+        " Fdr ": " FDR ", "Fdr ": "FDR ", " Lie ": " LIE ",
+        " Bqe": " BQE", " Cpw": " CPW", " Ny-440": " NY-440",
+        " M.L.K.": " M.L.K.", " W ": " W ", " E ": " E ",
+        " Nb": " NB", " Sb": " SB", " Eb": " EB", " Wb": " WB",
+        " Between ": " between ", " And ": " and ", " At ": " at ",
+    }
+    padded = f" {titled} "
+    for old, new in replacements.items():
+        padded = padded.replace(old, new)
+    return re.sub(r"\s+", " ", padded).strip()
+
+
 def haversine_m(lat1, lon1, lat2, lon2):
     r = 6371000
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -140,6 +162,7 @@ def main():
                 continue
             rows.append({
                 "segment_id_2024": a.segment_id, "base_id_2025": int(b.base_id),
+                "display_name": display_label(a.label),
                 "location_2024": a.label, "location_2025": b.label,
                 "distance_m": round(dist, 1), "text_score": round(score, 1),
                 "match_tier": match_tier,
