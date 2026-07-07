@@ -21,7 +21,11 @@ OUT = ROOT / "ATR" / "Analysis"
 
 MIDWEEK = {"Tuesday", "Wednesday", "Thursday"}
 MAX_DISTANCE_M = 75
-MIN_TEXT_SCORE = 72
+MIN_TEXT_SCORE = 60
+CLOSE_DISTANCE_M = 30
+CLOSE_TEXT_SCORE = 40
+VERY_CLOSE_DISTANCE_M = 12
+VERY_CLOSE_TEXT_SCORE = 35
 
 
 def norm(s: object) -> str:
@@ -97,26 +101,25 @@ def main():
     y24, y25 = load_2024(), load_2025()
     rows = []
     for _, a in y24.iterrows():
-        best = None
         for _, b in y25.iterrows():
             if int(a.direction_count) != int(b.direction_count):
                 continue
             dist = haversine_m(a.latitude, a.longitude, b.latitude, b.longitude)
-            if dist > MAX_DISTANCE_M:
-                continue
             score = fuzz.token_set_ratio(a.norm_label, b.norm_label)
-            if score < MIN_TEXT_SCORE:
+            match_tier = None
+            if dist <= MAX_DISTANCE_M and score >= MIN_TEXT_SCORE:
+                match_tier = "text_and_distance"
+            elif dist <= CLOSE_DISTANCE_M and score >= CLOSE_TEXT_SCORE:
+                match_tier = "close_distance"
+            elif dist <= VERY_CLOSE_DISTANCE_M and score >= VERY_CLOSE_TEXT_SCORE:
+                match_tier = "very_close_distance"
+            if match_tier is None:
                 continue
-            confidence = score - dist / 3
-            cand = (confidence, dist, score, b)
-            if best is None or cand[0] > best[0]:
-                best = cand
-        if best is not None:
-            _, dist, score, b = best
             rows.append({
                 "segment_id_2024": a.segment_id, "base_id_2025": int(b.base_id),
                 "location_2024": a.label, "location_2025": b.label,
                 "distance_m": round(dist, 1), "text_score": round(score, 1),
+                "match_tier": match_tier,
                 "direction_count": int(a.direction_count),
                 "directions_2024": ";".join(a.directions), "directions_2025": ";".join(b.directions),
                 "midweek_avg_2024": round(a.midweek_avg, 2),
@@ -125,12 +128,26 @@ def main():
                 "days_2024": int(a.days), "days_2025": int(b.days),
                 "records_2024": int(a.records), "records_2025": int(b.records),
             })
-    # Keep a strict one-to-one set: if a 2025 counter is the best candidate for
-    # multiple 2024 records, retain only the nearest/most text-similar match.
-    out = pd.DataFrame(rows)
-    out["confidence"] = out["text_score"] - out["distance_m"] / 3
-    out = (out.sort_values(["confidence", "text_score", "distance_m"], ascending=[False, False, True])
-             .drop_duplicates("base_id_2025", keep="first")
+    # Keep a strict one-to-one set: if records collide, retain the best
+    # text/proximity candidate on both sides.
+    candidates = pd.DataFrame(rows)
+    candidates["confidence"] = (
+        candidates["text_score"]
+        + (MAX_DISTANCE_M - candidates["distance_m"]).clip(lower=0) / 10
+    )
+    selected = []
+    used_2024 = set()
+    used_2025 = set()
+    for _, row in candidates.sort_values(
+        ["confidence", "text_score", "distance_m"],
+        ascending=[False, False, True],
+    ).iterrows():
+        if row.segment_id_2024 in used_2024 or row.base_id_2025 in used_2025:
+            continue
+        selected.append(row)
+        used_2024.add(row.segment_id_2024)
+        used_2025.add(row.base_id_2025)
+    out = (pd.DataFrame(selected)
              .sort_values(["segment_id_2024", "base_id_2025"])
              .drop(columns=["confidence"]))
     OUT.mkdir(exist_ok=True)

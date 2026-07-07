@@ -13,12 +13,11 @@ This folder contains a reproducible match of the project ATR locations from 2024
 - Converts the 2025 `WktGeom` points from New York Long Island State Plane feet (`EPSG:2263`) to WGS84 longitude/latitude (`EPSG:4326`) so they can be compared to the 2024 coordinates.
 - Normalizes street text by lowercasing, removing ATR prefixes, and standardizing common street suffixes/directions.
 - Considers a candidate match only when:
-  - the two points are within 75 meters;
-  - the normalized location text has a RapidFuzz token-set score of at least 72; and
-  - the two records count the same number of directions.
-- Keeps a strict one-to-one match set by selecting the highest confidence candidate for each 2025 location. Confidence is the text score penalized by distance.
+  - the two records count the same number of directions; and
+  - the pair satisfies one of three confidence tiers: within 75 meters with text score at least 60, within 30 meters with text score at least 40, or within 12 meters with text score at least 35. These closer-distance tiers recover sites whose 2025 names use infrastructure descriptors such as `Dead End`, `Bike Path`, or route/ramp labels instead of the 2024 cross-streets.
+- Keeps a strict one-to-one match set by selecting the highest confidence candidate on both the 2024 and 2025 sides. Confidence is the text score plus a small proximity bonus.
 - Computes `midweek_avg_2024` and `midweek_avg_2025` as the mean of the 15-minute counts/volumes across Tuesday, Wednesday, and Thursday records for the matched location. `pct_change` is `(2025 - 2024) / 2024 * 100`.
 
 ## Result summary
 
-The matching process found 15 confident locations. Percent changes range from -22.24% to +7.64%.
+The matching process found 37 confident locations. Percent changes range from -22.24% to +99.52%.
