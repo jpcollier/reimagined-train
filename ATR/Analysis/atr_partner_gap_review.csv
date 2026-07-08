@@ -1,0 +1,58 @@
+SegmentId,Direction,street,fromSt,toSt,2024,2025,perc_change,base_id_2025,match_status,nearest_segment_id_2024,nearest_location_2024,nearest_directions_2024,distance_m,text_score,strict_reject_reason,recommendation
+34537,EB,WEST 79 STREET,Henry Hudson Pkwy Nb Et 10 A,Henry Hudson Parkway Et 10 Nb,20080.5,77493.5,2.859141954,771451,matched,22P3A3B,33_ATR_79th Street EB at Riverside Drive,EB;WB,16.5,41.9,,already_matched
+34537,SB,WEST 79 STREET,Henry Hudson Pkwy Nb Et 10 A,Henry Hudson Parkway Et 10 Nb,20080.5,77493.5,2.859141954,771437,matched,22P3A3B,33_ATR_79th Street EB at Riverside Drive,EB;WB,16.5,41.9,,already_matched
+158990,SB,11 AVENUE,Bike Path,Bike Path,24971.83333,38675.5,0.548764942,771416,matched,32P4,32_ATR_9A at 14th Street_SB,SB,9.4,43.8,,already_matched
+142905,SB,12 AVENUE,West 24 Street,Bike Path,21551.33333,31906.16667,0.480472979,771419,matched,8P3A3B,39_ATR_9A W. 24th St and W 26th St,NB,18.6,48.8,,already_matched
+142883,SB,12 AVENUE,West 41 Street,West 42 Street,26964.83333,37593.5,0.394167712,771428,matched,37P4,37_ATR_9A between  W 42nd St and W 41st St,SB,1.9,70.6,,already_matched
+159241,NB,12 AVENUE,West 24 Street,West 26 Street,25932.16667,34932.66667,0.347078596,771420,matched,8P3A3B,39_ATR_9A W. 24th St and W 26th St,NB,18.7,70.6,,already_matched
+158825,EB,WEST HOUSTON STREET,Wooster Street,West Broadway,9138.5,11664.66667,0.276431216,771407,matched,2A8,52_ATR_West Houston Street between Wooster St and West Broadway,WB,17.9,100.0,,already_matched
+9006468,SB,ALLEN STREET,Dead End,East Houston Street,4805.0,3543.333333,-0.262573708,771408,matched,29P2,12_ATR_1 Avenue between Stanton St and E Houston St,NB;SB,24.9,67.9,,already_matched
+159039,WB,WEST HOUSTON STREET,Pedestrian Path,La Guardia Place,14753.16667,18232.83333,0.235858968,771406,matched,2A8,52_ATR_West Houston Street between Wooster St and West Broadway,WB,5.6,58.5,,already_matched
+152673,NB,12 AVENUE,West 42 Street,West 43 Street,34940.66667,43175.16667,0.235670947,771429,matched,4P3A3B,36_ATR_9A & W 42nd Street_NB between W 42nd St and W 43rd St,NB,55.2,64.9,,already_matched
+143052,WB,LONG ISLAND EXPWY ET 15 WB,Dead End,Borden Avenue,20866.33333,25302.66667,0.21260723,771449,matched,48P2,22_ATR_Exit from LIE LIE,WB,11.7,18.5,,already_matched
+143221,NB,11 AVENUE,10 Avenue,West 15 Street,23744.83333,28129.16667,0.184643677,771417,matched,15P3A3B,31_ATR_9A at 14th Street,NB,11.2,46.7,,already_matched
+16446,EB,FERRY TERMINAL DRIVE,Dead End,Staten Island Railway Line,3180.666667,3759.833333,0.182089709,771398,matched,53P2,27_ATR_Ferry Terminal Viaduct and Richmond Terrace#1,NB,9.8,57.4,,already_matched
+33123,NB,1 AVENUE,East 13 Street,14 Street/canarsie Line,21103.16667,17328.66667,-0.178859413,771414,matched,27P2,10_ATR_1 Avenue between E 13th St and E 14th St,NB,1.0,66.7,,already_matched
+33128,SB,2 AVENUE,14 Street/canarsie Line,East 15 Street,24946.33333,20519.0,-0.177474312,771415,matched,28P2,11_ATR_2 Avenue between E 14th St and E 15th St,SB,7.6,66.7,,already_matched
+36524,NB,FDR DRIVE EXIT 12 NORTHBOUND,Dead End,East 61 Street,14923.33333,12484.83333,-0.163401832,771435,matched,23P3A3B,34_ATR_FDR Dr on Ramp at 63rd Street,EB,28.5,52.9,,already_matched
+9006474,NB,ALLEN STREET,Dead End,East Houston Street,11644.5,9774.166667,-0.160619463,771409,matched,29P2,12_ATR_1 Avenue between Stanton St and E Houston St,NB;SB,7.6,67.9,,already_matched
+66192,EB,LIE WB ENTRANCE VAN DAM ST,Dead End,Van Dam Street,1272.333333,1074.833333,-0.155226618,771448,matched,49P2,23_ATR_Ent from Van Dam Street and Van Dam Street,EB,5.3,83.3,,already_matched
+35407,SB,LIE WESTBOUND ENTRANCE 50 AVE,50 Avenue,Lie Westbound Entrance 21 St,4753.333333,5483.0,0.153506311,771446,matched,56P2,30_ATR_Queen Midtown Tunnel Entrance at 50th Avenue,SB,0.9,60.5,,already_matched
+35550,WB,LIE WESTBOUND ENTRANCE 21 ST,21 Street,Lie Westbound Entrance 50 Ave,4150.5,4771.0,0.14950006,771447,matched,54P2,28_ATR_Queen Midtown Tunnel Entrance at  21st Street,WB,26.0,61.3,,already_matched
+34153,EB,EAST 34 STREET,Lexington Avenue,3 Avenue,17497.83333,15697.33333,-0.102898454,771424,matched,1B3,50_ATR_ East 34th Street between Lexington Ave and 3rd Ave,EB,8.1,88.0,,already_matched
+34153,WB,EAST 34 STREET,Lexington Avenue,3 Avenue,17497.83333,15697.33333,-0.102898454,771425,matched,1B3,50_ATR_ East 34th Street between Lexington Ave and 3rd Ave,EB,8.1,88.0,,already_matched
+33660,SB,9 AVENUE,West 33 Street,West 34 Street,21953.33333,20011.0,-0.088475554,771421,matched,11P1,2_ATR_9th Avenue SB between 34th St and 33rd St,SB,12.8,76.9,,already_matched
+33831,NB,8 AVENUE,8 Avenue Line,8 Avenue Line,15669.66667,14426.5,-0.079335872,771426,matched,9P1,6_ATR_8th Avenue between W 41st St and W 42nd St,NB,5.0,46.2,,already_matched
+9003125,NB,COLUMBIA STREET,Dead End,Dead end,5335.833333,4916.5,-0.078588162,771410,matched,26P2,9_ATR_Columbia Street NB between Rivington St and E Houston St,NB;SB,12.2,71.0,,already_matched
+9003125,SB,COLUMBIA STREET,Dead End,Dead end,5335.833333,4916.5,-0.078588162,771411,matched,26P2,9_ATR_Columbia Street NB between Rivington St and E Houston St,NB;SB,12.2,71.0,,already_matched
+36279,WB,EAST 61 STREET,Lexington Avenue,3 Avenue,5985.0,5536.0,-0.075020886,771434,matched,12P1,3_ATR_East 61 Street between Lexington Ave and 3rd Ave,WB,6.7,95.8,,already_matched
+36038,EB,65 ST TRANSVERSE,Center Drive,West Drive,26235.83333,24353.83333,-0.071733952,771432,matched,14P4,14_ATR_65th Street Between  5th Ave and CPW,WB,49.7,51.1,,already_matched
+36038,WB,65 ST TRANSVERSE,Center Drive,West Drive,26235.83333,24353.83333,-0.071733952,771433,matched,14P4,14_ATR_65th Street Between  5th Ave and CPW,WB,49.7,51.1,,already_matched
+104628,EB,QUEENS BOULEVARD,38 Street,39 Street,14468.16667,15132.83333,0.045939937,771445,matched,47P2,21_ATR_Queens Blvd between 38th St and 39th St,EB,11.6,90.9,,already_matched
+133099,EB,EAST 63 STREET,Dead End,Dead end,12481.0,12901.16667,0.033664503,771436,matched,3P3A3B,35_ATR_East 63rd Street at  York Avenue,EB,7.5,59.5,,already_matched
+160834,WB,FERRY TERMINAL DRIVE,Staten Island Railway Line,Dead end,3748.166667,3819.833333,0.019120459,771397,matched,52P2,26_ATR_Ferry Terminal Exit at Ferry Terminal Viaduct#1,SB,6.0,60.9,,already_matched
+32319,EB,CANAL STREET,Manhattan Bridge Line,Baxter Street,33849.66667,33259.33333,-0.017439857,771403,matched,33P2,16_ATR_Canal Street EB between Walker St and Mulberry St,EB;WB,17.7,50.0,,already_matched
+32319,WB,CANAL STREET,Manhattan Bridge Line,Baxter Street,33849.66667,33259.33333,-0.017439857,771404,matched,33P2,16_ATR_Canal Street EB between Walker St and Mulberry St,EB;WB,17.7,50.0,,already_matched
+34384,EB,WEST 62 STREET,Columbus Avenue,Amsterdam Avenue,5279.833333,5203.0,-0.014552227,771430,matched,13P1,4_ATR_West 62nd St EB between Amsterdam Ave and Columbus Ave,EB;WB,23.3,94.7,,already_matched
+34384,WB,WEST 62 STREET,Columbus Avenue,Amsterdam Avenue,5279.833333,5203.0,-0.014552227,771431,matched,13P1,4_ATR_West 62nd St EB between Amsterdam Ave and Columbus Ave,EB;WB,23.3,94.7,,already_matched
+157025,WB,QUEENS BOULEVARD,39 Street,39 Place,12673.16667,12803.16667,0.010257894,771444,matched,46P2,20_ATR_Queens Blvd between 39th St  and 39th Place,WB,8.9,95.8,,already_matched
+33814,EB,WEST 34 STREET,8 Avenue,9 Avenue,16375.33333,16291.0,-0.005150022,771422,matched,1B6,54_ATR_ West 34th Street_EB between 8th Ave and 9th Ave,EB,11.5,76.9,,already_matched
+33814,WB,WEST 34 STREET,8 Avenue,9 Avenue,16375.33333,16291.0,-0.005150022,771423,matched,1B6,54_ATR_ West 34th Street_EB between 8th Ave and 9th Ave,EB,11.5,76.9,,already_matched
+32314,EB,WALKER STREET,Baxter Street,Canal Street,,3345.833333,,771405,unmatched,33P2,16_ATR_Canal Street EB between Walker St and Mulberry St,EB;WB,14.3,81.1,direction_count_mismatch,manual_review_direction_split
+33463,SB,9 AVENUE,West 22 Street,West 23 Street,,17984.16667,,771418,matched,15P1,5_ATR_9th Avenue between W 22nd St and 23rd St,SB,8.4,84.2,,already_matched
+33840,SB,9 AVENUE,West 42 Street,West 43 Street,,24311.5,,771427,matched,10P1,1_ATR _9th Avenue SB between W 42nd St and W 43rd St,SB,8.0,78.0,,already_matched
+66284,EB,BORDEN AVENUE,Greenpoint Avenue,Long Island Expwy Et 17 E-w Eb,,36610.16667,,771450,matched,35P2,19_ATR_Borden Ave on Ramp at LIE_EB 1,EB,1.5,60.5,,already_matched
+139020,NB,MAJOR DEEGAN EXPRESSWAY,High Bridge,Major Deegan Expwy Et 7 N Sb,,46812.0,,771441,matched,1P2,7_ATR_Major Deegan Depot Place_NB,NB;SB,11.0,61.5,,already_matched
+139739,EB,GRAND CENTRAL PARKWAY,Dead End,Brooklyn Queens Expwy Et 42 Eb,,92399.5,,771443,matched,50P2,24_ATR_Grand Central Parkway WB BQE,WB,25.4,83.7,,already_matched
+150832,NB,F D R DRIVE,Dead End,Pedestrian Overpass,,60394.16667,,771402,unmatched,42P4,42_ATR_FDR Dr Btwn Jackson St and Cherry St,NB,19.5,39.4,below_confidence_tier,manual_review_direction_split
+151133,NB,DR M L KING JR EXPRESSWAY,Dead End,Dead end,,37385.16667,,771395,unmatched,48P4,48_ATR_NY-440 Dr. M.L.K. Jr Expwy & Btwn Walker Street and Dixon Avenue_NB,NB,37.0,55.0,below_confidence_tier,manual_review_direction_split
+151133,SB,DR M L KING JR EXPRESSWAY,Dead End,Dead end,,37385.16667,,771396,unmatched,48P4,48_ATR_NY-440 Dr. M.L.K. Jr Expwy & Btwn Walker Street and Dixon Avenue_NB,NB,37.0,55.0,direction_set_mismatch,manual_review
+151268,SB,F D R DRIVE,Dead End,Pedestrian Overpass,,64217.83333,,771401,unmatched,42P4,42_ATR_FDR Dr Btwn Jackson St and Cherry St,NB,20.7,39.4,direction_set_mismatch,manual_review
+152997,WB,GRAND CENTRAL PARKWAY,Dead End,Dead end,,101072.3333,,771442,matched,50P2,24_ATR_Grand Central Parkway WB BQE,WB,15.4,83.7,,already_matched
+154477,SB,MAJOR DEEGAN EXPRESSWAY,High Bridge,Major Deegan Expwy Et 7 N Sb,,41798.16667,,771440,matched,1P2,7_ATR_Major Deegan Depot Place_NB,NB;SB,17.4,61.5,,already_matched
+194164,NB,F D R DRIVE,Dead End,E 6 Str-e River Park Ped Ovps,,67231.83333,,771413,matched,46P4,46_ATR_FDR Dr Btwn E Houston Street and E 6th Street_NB,NB,18.1,44.7,,already_matched
+229695,NB,HENRY HUDSON PARKWAY,Henry Hudson Parkway Et 11 Sb,Dead end,,56323.33333,,771439,matched,7P3A3B,38_ATR_Henry Hudson Parkway Ramp,NB,25.9,87.2,,already_matched
+229701,SB,HENRY HUDSON PARKWAY,Henry Hudson Parkway Et 11 Sb,Dead end,,66947.66667,,771438,matched,9P3A3B,41_ATR_Henry Hudson Parkway Ramp_1,SB,25.3,82.9,,already_matched
+240423,SB,F D R DRIVE,Dead End,E 6 Str-e River Park Ped Ovps,,71689.33333,,771412,matched,46P4,46_ATR_FDR Dr Btwn E Houston Street and E 6th Street_NB,NB,15.8,44.7,,already_matched
+240837,WB,F D R DRIVE,Dead End,Manhattan Bridge Pedestrian Path,,59157.83333,,771399,matched,44P4,44_ATR_FDR Dr Btwn Market Slip and Manhattan Bridge,NB,8.1,64.4,,already_matched
+240850,EB,F D R DRIVE,Fdr Drive Nb En Brooklyn Brdg,Manhattan Bridge Pedestrian Path,,57604.5,,771400,matched,44P4,44_ATR_FDR Dr Btwn Market Slip and Manhattan Bridge,NB,8.0,73.0,,already_matched
