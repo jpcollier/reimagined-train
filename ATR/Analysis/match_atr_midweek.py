@@ -30,6 +30,24 @@ VERY_CLOSE_DISTANCE_M = 12
 VERY_CLOSE_TEXT_SCORE = 35
 
 
+OPPOSITE_DIRECTIONS = {
+    ("NB", "SB"), ("SB", "NB"),
+    ("EB", "WB"), ("WB", "EB"),
+}
+
+
+def directions_compatible(left_direction: str, right_direction: str) -> bool:
+    """Return whether differently named directions can describe the same count stream.
+
+    Across methodologies, one year may use the road's general compass axis while
+    another may use the direction a vehicle is traveling at the count point. This
+    means NB can be compatible with EB/WB, but NB is not compatible with SB.
+    """
+    left = str(left_direction).upper()
+    right = str(right_direction).upper()
+    return (left, right) not in OPPOSITE_DIRECTIONS
+
+
 def norm(s: object) -> str:
     s = "" if pd.isna(s) else str(s).lower()
     reps = {
@@ -230,29 +248,31 @@ def partner_priority_keys() -> set[tuple[int, str]]:
     return set(zip(partner["SegmentId"].astype(int), partner["Direction"].astype(str)))
 
 
-def match_direction_splits(y24: pd.DataFrame, y25_unmatched: pd.DataFrame, priority_keys: set[tuple[int, str]] | None = None) -> pd.DataFrame:
+def match_direction_splits(y24_directions: pd.DataFrame, y25_unmatched: pd.DataFrame, priority_keys: set[tuple[int, str]] | None = None) -> pd.DataFrame:
     priority_keys = priority_keys or set()
     rows = []
-    for _, a in y24.iterrows():
-        if int(a.direction_count) <= 1:
-            continue
+    for _, a in y24_directions.iterrows():
+        direction_2024 = a.direction_of_travel
         for _, b in y25_unmatched.iterrows():
             if int(b.direction_count) != 1:
                 continue
-            direction = b.directions[0]
-            if direction not in tuple(a.directions):
+            direction_2025 = b.directions[0]
+            if not directions_compatible(direction_2024, direction_2025):
                 continue
             dist, score, match_tier = score_match(a, b)
             if match_tier is None:
                 continue
+            exact_direction = direction_2024 == direction_2025
             rows.append({
                 "segment_id_2024": a.segment_id,
                 "base_id_2025": b.base_id,
-                "matched_direction": direction,
+                "matched_direction": direction_2024,
+                "direction_methodology_mismatch": not exact_direction,
                 "distance_m_2024_2025": round(dist, 1),
                 "text_score_2024_2025": round(score, 1),
-                "match_tier_2024_2025": f"direction_split_{match_tier}",
-                "partner_priority": int((int(b.segment_id_2025), direction) in priority_keys),
+                "match_tier_2024_2025": f"direction_split_{match_tier}" if exact_direction else f"direction_methodology_{match_tier}",
+                "partner_priority": int((int(b.segment_id_2025), direction_2025) in priority_keys),
+                "exact_direction_priority": int(exact_direction),
                 "confidence": score + max(MAX_DISTANCE_M - dist, 0) / 10,
             })
     candidates = pd.DataFrame(rows)
@@ -262,8 +282,8 @@ def match_direction_splits(y24: pd.DataFrame, y25_unmatched: pd.DataFrame, prior
     used_direction_pairs = set()
     used_2025 = set()
     for _, row in candidates.sort_values(
-        ["partner_priority", "confidence", "text_score_2024_2025", "distance_m_2024_2025"],
-        ascending=[False, False, False, True],
+        ["partner_priority", "exact_direction_priority", "confidence", "text_score_2024_2025", "distance_m_2024_2025"],
+        ascending=[False, False, False, False, True],
     ).iterrows():
         direction_pair = (row.segment_id_2024, row.matched_direction)
         if direction_pair in used_direction_pairs or row.base_id_2025 in used_2025:
@@ -271,7 +291,7 @@ def match_direction_splits(y24: pd.DataFrame, y25_unmatched: pd.DataFrame, prior
         selected.append(row)
         used_direction_pairs.add(direction_pair)
         used_2025.add(row.base_id_2025)
-    return pd.DataFrame(selected).drop(columns=["confidence", "partner_priority"], errors="ignore")
+    return pd.DataFrame(selected).drop(columns=["confidence", "partner_priority", "exact_direction_priority"], errors="ignore")
 
 
 def pct_change(new: float, old: float) -> float:
@@ -322,9 +342,9 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
         "text_score_2024_2025": m.text_score_2024_2025,
         "match_tier_2024_2025": m.match_tier_2024_2025,
         "match_type": match_type,
-        "volume_comparability": "direction_exact" if use_directional_2024 else "direction_set_exact",
+        "volume_comparability": ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_exact" if use_directional_2024 else "direction_set_exact")),
         "needs_review": "TRUE" if use_directional_2024 else "FALSE",
-        "strict_reject_reason": "direction_set_mismatch" if use_directional_2024 else "",
+        "strict_reject_reason": ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_set_mismatch" if use_directional_2024 else "")),
         "direction_count": 1 if use_directional_2024 else int(a.direction_count),
         "directions_2024": directions_2024,
         "directions_2025": ";".join(b.directions),
@@ -400,7 +420,7 @@ def write_partner_gap_audit(y24: pd.DataFrame, y25: pd.DataFrame, matched_base_i
             dist, score, a = nearest[0]
             reason = "" if status == "matched" else strict_reject_reason(a, b, dist, score)
             recommendation = "already_matched" if status == "matched" else (
-                "manual_review_direction_split" if p.Direction in tuple(a.directions) else "manual_review")
+                "manual_review_direction_split" if p.Direction in tuple(a.directions) else ("manual_review_direction_methodology" if any(directions_compatible(d, p.Direction) for d in tuple(a.directions)) else "manual_review"))
             audit_rows.append({
                 **p.to_dict(), "base_id_2025": int(b.base_id), "match_status": status,
                 "nearest_segment_id_2024": a.segment_id, "nearest_location_2024": a.label,
@@ -435,7 +455,7 @@ def main():
 
     used_2025 = set(matches_24_25["base_id_2025"].astype(int)) if not matches_24_25.empty else set()
     y25_unmatched = y25[~y25["base_id"].astype(int).isin(used_2025)]
-    direction_matches = match_direction_splits(y24, y25_unmatched, partner_priority_keys())
+    direction_matches = match_direction_splits(y24_dir, y25_unmatched, partner_priority_keys())
 
     joined = matches_24_25.merge(matches_23_24, on="segment_id_2024", how="left")
     y23_lookup = y23.set_index("segment_id")
