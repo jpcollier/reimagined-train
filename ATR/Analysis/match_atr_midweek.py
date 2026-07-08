@@ -3,7 +3,9 @@
 
 Midweek is Tuesday, Wednesday, and Thursday. Locations are matched only when
 nearby and textually similar, and when both years have the same counted
-directions.
+directions. Segments whose raw data bundles several count streams under one
+date/time/direction key (e.g. mainline plus service road) are excluded, since
+their summed volumes are not comparable across years.
 """
 from __future__ import annotations
 
@@ -76,11 +78,29 @@ def haversine_m(lat1, lon1, lat2, lon2):
     return 2 * r * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
 
+def drop_multi_stream_segments(df: pd.DataFrame, key: list[str], id_col: str, year: int) -> pd.DataFrame:
+    """Exclude segments recording several count streams under one interval key.
+
+    A few segment ids bundle multiple physical count locations (e.g. mainline
+    plus service road, or several ramp lanes) as duplicate rows per
+    date/time/direction. Summing those streams is not comparable to a year
+    that counted only one of them, so such segments are removed from the
+    match universe.
+    """
+    ambiguous = sorted(df.loc[df.duplicated(subset=key, keep=False), id_col].unique())
+    if ambiguous:
+        print(f"{year}: excluding multi-stream segments: {', '.join(map(str, ambiguous))}")
+        df = df[~df[id_col].isin(ambiguous)].copy()
+    return df
+
+
 def load_parquet_year(year: int):
     df = pd.read_parquet(DATA / f"{year}_Traffic_Counts_ATR.parquet")
     df["date"] = pd.to_datetime(df["date"])
     df["day_name"] = df["date"].dt.day_name()
     df = df[df["day_name"].isin(MIDWEEK)].copy()
+    df = drop_multi_stream_segments(
+        df, ["segment_id", "date", "start_time", "direction_of_travel"], "segment_id", year)
     df["hour"] = pd.to_datetime(df["start_time"].astype(str), format="%H:%M:%S").dt.hour
     hourly = (df.groupby(["segment_id", "date", "hour"], as_index=False)
                 .agg(hourly_volume=("count", "sum")))
@@ -115,6 +135,8 @@ def parse_point(wkt):
 def load_2025():
     df = pd.read_csv(DATA / "2025_Traffic_Counts_ATR.csv")
     df = df[df["Weekday"].isin(MIDWEEK)].copy()
+    df = drop_multi_stream_segments(
+        df, ["base_id", "Date", "Time", "Direction"], "base_id", 2025)
     xy = df["WktGeom"].map(parse_point)
     df["x"] = [p[0] for p in xy]; df["y"] = [p[1] for p in xy]
     transformer = Transformer.from_crs("EPSG:2263", "EPSG:4326", always_xy=True)

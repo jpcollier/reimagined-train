@@ -12,6 +12,7 @@ This folder contains a reproducible match of the project ATR locations across 20
 
 - Defines **midweek** as Tuesday, Wednesday, and Thursday.
 - Reads the 2023 and 2024 parquet files through the same historical ATR loader so both years use identical day filtering, hourly aggregation, site labels, direction counts, and daily-volume calculations.
+- Excludes segments whose raw data bundles several count streams under one date/time/direction key (2023: `19P3A3B`, `35P2`, `8P2`; 2024: `18P4`, `34P2` — for example Long Island Expressway mainline plus service road under one segment id). Summing those streams is not comparable to a year that counted only one of them; the earlier `35P2` 2023 history, which showed an artificial -46% 2023-to-2024 change for this reason, is dropped.
 - Converts the 2025 `WktGeom` points from New York Long Island State Plane feet (`EPSG:2263`) to WGS84 longitude/latitude (`EPSG:4326`) so they can be compared to the historical coordinates.
 - Normalizes street text by lowercasing, removing ATR prefixes, and standardizing common street suffixes/directions.
 - Creates `display_name` by stripping ATR prefixes from the 2024 label and applying readable capitalization for table display.
@@ -26,4 +27,4 @@ This folder contains a reproducible match of the project ATR locations across 20
 
 ## Result summary
 
-The matching process found 32 confident 2024-to-2025 locations. Of those, 15 also have matched 2023 history. The 2024-to-2025 percent changes range from -22.24% to +54.88%; among rows with 2023 history, 2023-to-2025 percent changes range from -20.16% to +70.77%.
+The matching process found 32 confident 2024-to-2025 locations. Of those, 14 also have matched 2023 history. The 2024-to-2025 percent changes range from -22.24% to +54.88%; among rows with 2023 history, 2023-to-2025 percent changes range from -19.25% to +70.77%.
