@@ -1,80 +1,80 @@
-source,location_group,count_location_id,display_location,midweek_avg_daily_volume_2024,midweek_avg_daily_volume_2025,percent_change_2024_2025
-ATR,1 Avenue,27P2,1 Avenue between E 13th St and E 14th St,21103.2,17328.7,-17.9
-ATR,1 Avenue,29P2,1 Avenue between Stanton St and E Houston St,4805.0,3543.3,-26.3
-ATR,1 Avenue,29P2,1 Avenue between Stanton St and E Houston St,11644.5,9774.2,-16.1
-ATR,2 Avenue,28P2,2 Avenue between E 14th St and E 15th St,24946.3,20519.0,-17.7
-ATR,65th Street,14P4,65th Street between 5th Ave and CPW,12875.3,11361.7,-11.8
-ATR,65th Street,15P4,65th Street between 5th Ave and CPW,13360.5,12992.2,-2.8
-ATR,79th Street,22P3A3B,79th Street EB at Riverside Drive,8825.7,66947.7,658.6
-ATR,79th Street,22P3A3B,79th Street EB at Riverside Drive,11254.8,10545.8,-6.3
-ATR,8th Avenue,9P1,8th Avenue between W 41st St and W 42nd St,15669.7,14426.5,-7.9
-ATR,9th Avenue,11P1,9th Avenue SB between 34th St and 33rd St,21953.3,20011.0,-8.8
-ATR,9th Avenue,10P1,9th Avenue SB between W 42nd St and W 43rd St,23735.5,24311.5,2.4
-ATR,9th Avenue,15P1,9th Avenue between W 22nd St and 23rd St,16707.8,17984.2,7.6
-ATR,Borden Ave,35P2,Borden Ave On Ramp at LIE EB 1,24652.3,36610.2,48.5
-ATR,Canal Street,33P2,Canal Street EB between Walker St and Mulberry St,18825.0,18330.3,-2.6
-ATR,Canal Street,33P2,Canal Street EB between Walker St and Mulberry St,15024.7,14929.0,-0.6
-ATR,Columbia Street,26P2,Columbia Street NB between Rivington St and E Houston St,2602.5,2167.2,-16.7
-ATR,Columbia Street,26P2,Columbia Street NB between Rivington St and E Houston St,2733.3,2749.3,0.6
-ATR,East 34th Street,51P4,East 34th Street WB between 3rd Ave and Lexington Ave,8237.3,8496.7,3.1
-ATR,East 34th Street,1B3,East 34th Street between Lexington Ave and 3rd Ave,9260.5,7200.7,-22.2
-ATR,East 61 Street,12P1,East 61 Street between Lexington Ave and 3rd Ave,5985.0,5536.0,-7.5
-ATR,East 63rd Street,3P3A3B,East 63rd Street at York Avenue,12481.0,12901.2,3.4
-ATR,Ent From Van Dam Street and Van Dam Street,49P2,Ent From Van Dam Street and Van Dam Street,1272.3,1074.8,-15.5
-ATR,Exit From LIE Lie,48P2,Exit From LIE Lie,20866.3,25302.7,21.3
-ATR,FDR Drive,23P3A3B,FDR Dr On Ramp at 63rd Street,14923.3,12484.8,-16.3
-ATR,FDR Drive,46P4,FDR Dr between E Houston Street and E 6th Street NB,57315.1,67231.8,17.3
-ATR,FDR Drive,47P4,FDR Dr between E Houston Street and E 6th Street SB,68101.8,71689.3,5.3
-ATR,FDR Drive,44P4,FDR Dr between Market Slip and Manhattan Bridge,58078.9,57604.5,-0.8
-ATR,FDR Drive,45P4,FDR Dr between Market Slip and Manhattan Bridge,60616.0,59157.8,-2.4
-ATR,Ferry Terminal,52P2,Ferry Terminal Exit at Ferry Terminal Viaduct#1,3748.2,3819.8,1.9
-ATR,Ferry Terminal Viaduct,53P2,Ferry Terminal Viaduct and Richmond Terrace#1,3180.7,3759.8,18.2
-ATR,Grand Central Parkway BQE,51P2,Grand Central Parkway EB BQE,98400.2,92399.5,-6.1
-ATR,Grand Central Parkway BQE,50P2,Grand Central Parkway WB BQE,106724.7,101072.3,-5.3
-ATR,Henry Hudson Parkway Ramp,7P3A3B,Henry Hudson Parkway Ramp,61267.3,56323.3,-8.1
-ATR,Henry Hudson Parkway Ramp 1,9P3A3B,Henry Hudson Parkway Ramp 1,65367.3,66947.7,2.4
-ATR,Major Deegan Depot Place,1P2,Major Deegan Depot Place NB,44991.8,41798.2,-7.1
-ATR,Major Deegan Depot Place,1P2,Major Deegan Depot Place NB,47446.8,46812.0,-1.3
-ATR,Queen Midtown Tunnel,54P2,Queen Midtown Tunnel Entrance at 21st Street,4150.5,4771.0,15.0
-ATR,Queen Midtown Tunnel,56P2,Queen Midtown Tunnel Entrance at 50th Avenue,4753.3,5483.0,15.4
-ATR,Queens Blvd,47P2,Queens Blvd between 38th St and 39th St,14468.2,15132.8,4.6
-ATR,Queens Blvd,46P2,Queens Blvd between 39th St and 39th Place,12673.2,12803.2,1.0
-ATR,Route 9A,15P3A3B,9A at 14th Street,23744.8,28129.2,18.5
-ATR,Route 9A,32P4,9A at 14th Street SB,24971.8,38675.5,54.9
-ATR,Route 9A,40P4,9A at W. 24th Street,21551.3,31906.2,48.0
-ATR,Route 9A,37P4,9A between W 42nd St and W 41st St,26964.8,37593.5,39.4
-ATR,Route 9A & W 42nd Street,4P3A3B,9A & W 42nd Street NB between W 42nd St and W 43rd St,34940.7,43175.2,23.6
-ATR,Route 9A W. 24th St,8P3A3B,9A W. 24th St and W 26th St,25932.2,34932.7,34.7
-ATR,West 34th Street,1B6,West 34th Street EB between 8th Ave and 9th Ave,7679.3,8076.2,5.2
-ATR,West 34th Street,55P4,West 34th Street WB between 8th Ave and 9th Ave,8696.0,8214.8,-5.5
-ATR,West 62nd St,13P1,West 62nd St EB between Amsterdam Ave and Columbus Ave,3436.0,3054.0,-11.1
-ATR,West 62nd St,13P1,West 62nd St EB between Amsterdam Ave and Columbus Ave,1843.8,2149.0,16.6
-ATR,West Houston Street,53P4,West Houston Street EB between West Broadway and Wooster St,9138.5,11664.7,27.6
-ATR,West Houston Street,2A8,West Houston Street between Wooster St and West Broadway,14753.2,18232.8,23.6
-VTMC,1st Ave,27P2,1st Ave at 13th St,21962.0,22387.0,1.9
-VTMC,21st St,2B12,21st St at 36th Ave,26595.0,29938.0,12.6
-VTMC,2nd Ave,28P2,2nd Ave at 14th St,30960.0,28462.0,-8.1
-VTMC,3rd Ave,2A6,3rd Ave at 14th St,23201.0,31406.0,35.4
-VTMC,3rd Ave,1B3,3rd Ave at 34 St,40672.0,41876.0,3.0
-VTMC,3rd Ave,1A8,3rd Ave at 57th St,44721.0,41307.0,-7.6
-VTMC,6th Ave,1B2,6th Ave at 23rd St,40330.0,41187.0,2.1
-VTMC,7th Ave,2A7,7th Ave at 14th St,24772.0,29362.0,18.5
-VTMC,7th Ave,1A10,7th Ave at 57th St,30322.0,32146.0,6.0
-VTMC,8th Ave,1B6,8th Ave at 34 St,28632.0,29036.0,1.4
-VTMC,8th Ave,9P1,8th Ave at 41 St,20427.0,19828.0,-2.9
-VTMC,9th Ave,15P1,9th Ave at 22nd St,19503.0,19094.0,-2.1
-VTMC,9th Ave,11P1,9th Ave at 34 St,36274.0,35819.0,-1.3
-VTMC,9th Ave,10P1,9th Ave at 42 St,41634.0,38199.0,-8.3
-VTMC,Allen St,29P2,Allen St at Stanton St,13157.0,14857.0,12.9
-VTMC,Boerum Place,2B3,Boerum Place at Atlantic Ave,40429.0,39909.0,-1.3
-VTMC,Canal St,33P2,Canal St at Walker St,35552.0,31235.0,-12.1
-VTMC,Church St,2A10,Church St at Chamber St,26176.0,25650.0,-2.0
-VTMC,Flatbush Ave,2B8,Flatbush Ave at Atlantic Ave,58608.0,59127.0,0.9
-VTMC,Flatbush Ave Ext,2B1,Flatbush Ave Ext at Tillary St,92156.0,88322.0,-4.2
-VTMC,Hicks St,2B4,Hicks St at Atlantic Ave,29509.0,25127.0,-14.8
-VTMC,Lexington Ave,1B7,Lexington Ave at 42nd St,31451.0,32571.0,3.6
-VTMC,Steinway St,2B11,Steinway St at Northern Blvd,39404.0,41364.0,5.0
-VTMC,Thompson Ave,2B10,Thompson Ave at Van Dam St,39068.0,46200.0,18.3
-VTMC,Union Square,3A8,Union Square at 15th St,26476.0,26144.0,-1.3
-VTMC,Water St,2A11,Water St at Fulton St,21287.0,21322.0,0.2
-VTMC,West Broadway,2A8,West Broadway at West Houston St,29337.0,35456.0,20.9
+source,location_group,count_segment_id_2024,count_segment_id_2025,display_location,midweek_avg_daily_volume_2024,midweek_avg_daily_volume_2025,percent_change_2024_2025
+ATR,1 Avenue,27P2,33123,1 Avenue between E 13th St and E 14th St,21103.2,17328.7,-17.9
+ATR,1 Avenue,29P2,9006468,1 Avenue between Stanton St and E Houston St,4805.0,3543.3,-26.3
+ATR,1 Avenue,29P2,9006474,1 Avenue between Stanton St and E Houston St,11644.5,9774.2,-16.1
+ATR,2 Avenue,28P2,33128,2 Avenue between E 14th St and E 15th St,24946.3,20519.0,-17.7
+ATR,65th Street,14P4,36038,65th Street between 5th Ave and CPW,12875.3,11361.7,-11.8
+ATR,65th Street,15P4,36038,65th Street between 5th Ave and CPW,13360.5,12992.2,-2.8
+ATR,79th Street,22P3A3B,34537,79th Street EB at Riverside Drive,8825.7,66947.7,658.6
+ATR,79th Street,22P3A3B,34537,79th Street EB at Riverside Drive,11254.8,10545.8,-6.3
+ATR,8th Avenue,9P1,33831,8th Avenue between W 41st St and W 42nd St,15669.7,14426.5,-7.9
+ATR,9th Avenue,11P1,33660,9th Avenue SB between 34th St and 33rd St,21953.3,20011.0,-8.8
+ATR,9th Avenue,10P1,33840,9th Avenue SB between W 42nd St and W 43rd St,23735.5,24311.5,2.4
+ATR,9th Avenue,15P1,33463,9th Avenue between W 22nd St and 23rd St,16707.8,17984.2,7.6
+ATR,Borden Ave,35P2,66284,Borden Ave On Ramp at LIE EB 1,24652.3,36610.2,48.5
+ATR,Canal Street,33P2,32319,Canal Street EB between Walker St and Mulberry St,18825.0,18330.3,-2.6
+ATR,Canal Street,33P2,32319,Canal Street EB between Walker St and Mulberry St,15024.7,14929.0,-0.6
+ATR,Columbia Street,26P2,9003125,Columbia Street NB between Rivington St and E Houston St,2602.5,2167.2,-16.7
+ATR,Columbia Street,26P2,9003125,Columbia Street NB between Rivington St and E Houston St,2733.3,2749.3,0.6
+ATR,East 34th Street,51P4,34153,East 34th Street WB between 3rd Ave and Lexington Ave,8237.3,8496.7,3.1
+ATR,East 34th Street,1B3,34153,East 34th Street between Lexington Ave and 3rd Ave,9260.5,7200.7,-22.2
+ATR,East 61 Street,12P1,36279,East 61 Street between Lexington Ave and 3rd Ave,5985.0,5536.0,-7.5
+ATR,East 63rd Street,3P3A3B,133099,East 63rd Street at York Avenue,12481.0,12901.2,3.4
+ATR,Ent From Van Dam Street and Van Dam Street,49P2,66192,Ent From Van Dam Street and Van Dam Street,1272.3,1074.8,-15.5
+ATR,Exit From LIE Lie,48P2,143052,Exit From LIE Lie,20866.3,25302.7,21.3
+ATR,FDR Drive,23P3A3B,36524,FDR Dr On Ramp at 63rd Street,14923.3,12484.8,-16.3
+ATR,FDR Drive,46P4,194164,FDR Dr between E Houston Street and E 6th Street NB,57315.1,67231.8,17.3
+ATR,FDR Drive,47P4,240423,FDR Dr between E Houston Street and E 6th Street SB,68101.8,71689.3,5.3
+ATR,FDR Drive,44P4,240850,FDR Dr between Market Slip and Manhattan Bridge,58078.9,57604.5,-0.8
+ATR,FDR Drive,45P4,240837,FDR Dr between Market Slip and Manhattan Bridge,60616.0,59157.8,-2.4
+ATR,Ferry Terminal,52P2,160834,Ferry Terminal Exit at Ferry Terminal Viaduct#1,3748.2,3819.8,1.9
+ATR,Ferry Terminal Viaduct,53P2,16446,Ferry Terminal Viaduct and Richmond Terrace#1,3180.7,3759.8,18.2
+ATR,Grand Central Parkway BQE,51P2,139739,Grand Central Parkway EB BQE,98400.2,92399.5,-6.1
+ATR,Grand Central Parkway BQE,50P2,152997,Grand Central Parkway WB BQE,106724.7,101072.3,-5.3
+ATR,Henry Hudson Parkway Ramp,7P3A3B,229695,Henry Hudson Parkway Ramp,61267.3,56323.3,-8.1
+ATR,Henry Hudson Parkway Ramp 1,9P3A3B,229701,Henry Hudson Parkway Ramp 1,65367.3,66947.7,2.4
+ATR,Major Deegan Depot Place,1P2,139020,Major Deegan Depot Place NB,47446.8,46812.0,-1.3
+ATR,Major Deegan Depot Place,1P2,154477,Major Deegan Depot Place NB,44991.8,41798.2,-7.1
+ATR,Queen Midtown Tunnel,54P2,35550,Queen Midtown Tunnel Entrance at 21st Street,4150.5,4771.0,15.0
+ATR,Queen Midtown Tunnel,56P2,35407,Queen Midtown Tunnel Entrance at 50th Avenue,4753.3,5483.0,15.4
+ATR,Queens Blvd,47P2,104628,Queens Blvd between 38th St and 39th St,14468.2,15132.8,4.6
+ATR,Queens Blvd,46P2,157025,Queens Blvd between 39th St and 39th Place,12673.2,12803.2,1.0
+ATR,Route 9A,15P3A3B,143221,9A at 14th Street,23744.8,28129.2,18.5
+ATR,Route 9A,32P4,158990,9A at 14th Street SB,24971.8,38675.5,54.9
+ATR,Route 9A,40P4,142905,9A at W. 24th Street,21551.3,31906.2,48.0
+ATR,Route 9A,37P4,142883,9A between W 42nd St and W 41st St,26964.8,37593.5,39.4
+ATR,Route 9A & W 42nd Street,4P3A3B,152673,9A & W 42nd Street NB between W 42nd St and W 43rd St,34940.7,43175.2,23.6
+ATR,Route 9A W. 24th St,8P3A3B,159241,9A W. 24th St and W 26th St,25932.2,34932.7,34.7
+ATR,West 34th Street,1B6,33814,West 34th Street EB between 8th Ave and 9th Ave,7679.3,8076.2,5.2
+ATR,West 34th Street,55P4,33814,West 34th Street WB between 8th Ave and 9th Ave,8696.0,8214.8,-5.5
+ATR,West 62nd St,13P1,34384,West 62nd St EB between Amsterdam Ave and Columbus Ave,3436.0,3054.0,-11.1
+ATR,West 62nd St,13P1,34384,West 62nd St EB between Amsterdam Ave and Columbus Ave,1843.8,2149.0,16.6
+ATR,West Houston Street,53P4,158825,West Houston Street EB between West Broadway and Wooster St,9138.5,11664.7,27.6
+ATR,West Houston Street,2A8,159039,West Houston Street between Wooster St and West Broadway,14753.2,18232.8,23.6
+VTMC,1st Ave,27P2,20908,1st Ave at 13th St,21962.0,22387.0,1.9
+VTMC,21st St,2B12,41416,21st St at 36th Ave,26595.0,29938.0,12.6
+VTMC,2nd Ave,28P2,20911,2nd Ave at 14th St,30960.0,28462.0,-8.1
+VTMC,3rd Ave,2A6,20817,3rd Ave at 14th St,23201.0,31406.0,35.4
+VTMC,3rd Ave,1B3,22466,3rd Ave at 34 St,40672.0,41876.0,3.0
+VTMC,3rd Ave,1A8,-1762,3rd Ave at 57th St,44721.0,41307.0,-7.6
+VTMC,6th Ave,1B2,20752,6th Ave at 23rd St,40330.0,41187.0,2.1
+VTMC,7th Ave,2A7,20558,7th Ave at 14th St,24772.0,29362.0,18.5
+VTMC,7th Ave,1A10,21549,7th Ave at 57th St,30322.0,32146.0,6.0
+VTMC,8th Ave,1B6,21341,8th Ave at 34 St,28632.0,29036.0,1.4
+VTMC,8th Ave,9P1,21349,8th Ave at 41 St,20427.0,19828.0,-2.9
+VTMC,9th Ave,15P1,21135,9th Ave at 22nd St,19503.0,19094.0,-2.1
+VTMC,9th Ave,11P1,21259,9th Ave at 34 St,36274.0,35819.0,-1.3
+VTMC,9th Ave,10P1,21354,9th Ave at 42 St,41634.0,38199.0,-8.3
+VTMC,Allen St,29P2,20776+20777,Allen St at Stanton St,13157.0,14857.0,12.9
+VTMC,Boerum Place,2B3,15720,Boerum Place at Atlantic Ave,40429.0,39909.0,-1.3
+VTMC,Canal St,33P2,-1761,Canal St at Walker St,35552.0,31235.0,-12.1
+VTMC,Church St,2A10,15371,Church St at Chamber St,26176.0,25650.0,-2.0
+VTMC,Flatbush Ave,2B8,18574,Flatbush Ave at Atlantic Ave,58608.0,59127.0,0.9
+VTMC,Flatbush Ave Ext,2B1,-1760,Flatbush Ave Ext at Tillary St,92156.0,88322.0,-4.2
+VTMC,Hicks St,2B4,15534,Hicks St at Atlantic Ave,29509.0,25127.0,-14.8
+VTMC,Lexington Ave,1B7,22500,Lexington Ave at 42nd St,31451.0,32571.0,3.6
+VTMC,Steinway St,2B11,41646,Steinway St at Northern Blvd,39404.0,41364.0,5.0
+VTMC,Thompson Ave,2B10,41447,Thompson Ave at Van Dam St,39068.0,46200.0,18.3
+VTMC,Union Square,3A8,20820,Union Square at 15th St,26476.0,26144.0,-1.3
+VTMC,Water St,2A11,15429,Water St at Fulton St,21287.0,21322.0,0.2
+VTMC,West Broadway,2A8,20520,West Broadway at West Houston St,29337.0,35456.0,20.9
