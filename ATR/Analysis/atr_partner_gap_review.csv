@@ -9,7 +9,7 @@ SegmentId,Direction,street,fromSt,toSt,2024,2025,perc_change,base_id_2025,match_
 9006468,SB,ALLEN STREET,Dead End,East Houston Street,4805.0,3543.333333,-0.262573708,771408,matched,29P2,12_ATR_1 Avenue between Stanton St and E Houston St,NB;SB,24.9,67.9,,already_matched
 159039,WB,WEST HOUSTON STREET,Pedestrian Path,La Guardia Place,14753.16667,18232.83333,0.235858968,771406,matched,2A8,52_ATR_West Houston Street between Wooster St and West Broadway,WB,5.6,58.5,,already_matched
 152673,NB,12 AVENUE,West 42 Street,West 43 Street,34940.66667,43175.16667,0.235670947,771429,matched,4P3A3B,36_ATR_9A & W 42nd Street_NB between W 42nd St and W 43rd St,NB,55.2,64.9,,already_matched
-143052,WB,LONG ISLAND EXPWY ET 15 WB,Dead End,Borden Avenue,20866.33333,25302.66667,0.21260723,771449,unmatched,48P2,22_ATR_Exit from LIE LIE,WB,11.7,18.5,text_too_low,manual_review_direction_split
+143052,WB,LONG ISLAND EXPWY ET 15 WB,Dead End,Borden Avenue,20866.33333,25302.66667,0.21260723,771449,matched,48P2,22_ATR_Exit from LIE LIE,WB,11.7,18.5,,already_matched
 143221,NB,11 AVENUE,10 Avenue,West 15 Street,23744.83333,28129.16667,0.184643677,771417,matched,15P3A3B,31_ATR_9A at 14th Street,NB,11.2,46.7,,already_matched
 16446,EB,FERRY TERMINAL DRIVE,Dead End,Staten Island Railway Line,3180.666667,3759.833333,0.182089709,771398,matched,53P2,27_ATR_Ferry Terminal Viaduct and Richmond Terrace#1,NB,9.8,57.4,,already_matched
 33123,NB,1 AVENUE,East 13 Street,14 Street/canarsie Line,21103.16667,17328.66667,-0.178859413,771414,matched,27P2,10_ATR_1 Avenue between E 13th St and E 14th St,NB,1.0,66.7,,already_matched
@@ -26,8 +26,8 @@ SegmentId,Direction,street,fromSt,toSt,2024,2025,perc_change,base_id_2025,match_
 9003125,NB,COLUMBIA STREET,Dead End,Dead end,5335.833333,4916.5,-0.078588162,771410,matched,26P2,9_ATR_Columbia Street NB between Rivington St and E Houston St,NB;SB,12.2,71.0,,already_matched
 9003125,SB,COLUMBIA STREET,Dead End,Dead end,5335.833333,4916.5,-0.078588162,771411,matched,26P2,9_ATR_Columbia Street NB between Rivington St and E Houston St,NB;SB,12.2,71.0,,already_matched
 36279,WB,EAST 61 STREET,Lexington Avenue,3 Avenue,5985.0,5536.0,-0.075020886,771434,matched,12P1,3_ATR_East 61 Street between Lexington Ave and 3rd Ave,WB,6.7,95.8,,already_matched
-36038,EB,65 ST TRANSVERSE,Center Drive,West Drive,26235.83333,24353.83333,-0.071733952,771432,unmatched,14P4,14_ATR_65th Street Between  5th Ave and CPW,WB,49.7,51.1,direction_set_mismatch,manual_review
-36038,WB,65 ST TRANSVERSE,Center Drive,West Drive,26235.83333,24353.83333,-0.071733952,771433,unmatched,14P4,14_ATR_65th Street Between  5th Ave and CPW,WB,49.7,51.1,below_confidence_tier,manual_review_direction_split
+36038,EB,65 ST TRANSVERSE,Center Drive,West Drive,26235.83333,24353.83333,-0.071733952,771432,matched,14P4,14_ATR_65th Street Between  5th Ave and CPW,WB,49.7,51.1,,already_matched
+36038,WB,65 ST TRANSVERSE,Center Drive,West Drive,26235.83333,24353.83333,-0.071733952,771433,matched,14P4,14_ATR_65th Street Between  5th Ave and CPW,WB,49.7,51.1,,already_matched
 104628,EB,QUEENS BOULEVARD,38 Street,39 Street,14468.16667,15132.83333,0.045939937,771445,matched,47P2,21_ATR_Queens Blvd between 38th St and 39th St,EB,11.6,90.9,,already_matched
 133099,EB,EAST 63 STREET,Dead End,Dead end,12481.0,12901.16667,0.033664503,771436,matched,3P3A3B,35_ATR_East 63rd Street at  York Avenue,EB,7.5,59.5,,already_matched
 160834,WB,FERRY TERMINAL DRIVE,Staten Island Railway Line,Dead end,3748.166667,3819.833333,0.019120459,771397,matched,52P2,26_ATR_Ferry Terminal Exit at Ferry Terminal Viaduct#1,SB,6.0,60.9,,already_matched

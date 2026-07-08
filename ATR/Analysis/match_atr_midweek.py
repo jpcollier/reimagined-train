@@ -260,6 +260,15 @@ def match_direction_splits(y24_directions: pd.DataFrame, y25_unmatched: pd.DataF
             if not directions_compatible(direction_2024, direction_2025):
                 continue
             dist, score, match_tier = score_match(a, b)
+            partner_full_value = (int(b.segment_id_2025), direction_2025) in priority_keys
+            partner_override = False
+            if match_tier is None and partner_full_value:
+                if dist <= MAX_DISTANCE_M and score >= 40:
+                    match_tier = "partner_full_value"
+                    partner_override = True
+                elif dist <= 15 and score >= 15:
+                    match_tier = "partner_full_value_very_close"
+                    partner_override = True
             if match_tier is None:
                 continue
             exact_direction = direction_2024 == direction_2025
@@ -271,7 +280,8 @@ def match_direction_splits(y24_directions: pd.DataFrame, y25_unmatched: pd.DataF
                 "distance_m_2024_2025": round(dist, 1),
                 "text_score_2024_2025": round(score, 1),
                 "match_tier_2024_2025": f"direction_split_{match_tier}" if exact_direction else f"direction_methodology_{match_tier}",
-                "partner_priority": int((int(b.segment_id_2025), direction_2025) in priority_keys),
+                "partner_priority": int(partner_full_value),
+                "partner_override": partner_override,
                 "exact_direction_priority": int(exact_direction),
                 "confidence": score + max(MAX_DISTANCE_M - dist, 0) / 10,
             })
@@ -342,9 +352,9 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
         "text_score_2024_2025": m.text_score_2024_2025,
         "match_tier_2024_2025": m.match_tier_2024_2025,
         "match_type": match_type,
-        "volume_comparability": ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_exact" if use_directional_2024 else "direction_set_exact")),
+        "volume_comparability": ("partner_full_value_override" if use_directional_2024 and bool(getattr(m, "partner_override", False)) else ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_exact" if use_directional_2024 else "direction_set_exact"))),
         "needs_review": "TRUE" if use_directional_2024 else "FALSE",
-        "strict_reject_reason": ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_set_mismatch" if use_directional_2024 else "")),
+        "strict_reject_reason": ("partner_full_value_override" if use_directional_2024 and bool(getattr(m, "partner_override", False)) else ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_set_mismatch" if use_directional_2024 else ""))),
         "direction_count": 1 if use_directional_2024 else int(a.direction_count),
         "directions_2024": directions_2024,
         "directions_2025": ";".join(b.directions),
