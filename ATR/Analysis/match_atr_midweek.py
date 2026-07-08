@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Match 2023/2024/2025 ATR count locations and compute midweek percent changes.
 
-Midweek is Tuesday, Wednesday, and Thursday. Locations are matched only when
-nearby and textually similar, and when both years have the same counted
-directions. Segments whose raw data bundles several count streams under one
-date/time/direction key (e.g. mainline plus service road) are excluded, since
-their summed volumes are not comparable across years.
+Midweek is Tuesday, Wednesday, and Thursday. Locations are first matched through
+strict one-to-one same-direction criteria. A second, explicitly flagged
+``direction_split`` pass recovers partner-important sites where 2025 has one
+base id per direction but the historical ATR record is bidirectional; those rows
+use direction-specific historical volumes and are marked for review.
 """
 from __future__ import annotations
 
@@ -79,19 +79,29 @@ def haversine_m(lat1, lon1, lat2, lon2):
 
 
 def drop_multi_stream_segments(df: pd.DataFrame, key: list[str], id_col: str, year: int) -> pd.DataFrame:
-    """Exclude segments recording several count streams under one interval key.
-
-    A few segment ids bundle multiple physical count locations (e.g. mainline
-    plus service road, or several ramp lanes) as duplicate rows per
-    date/time/direction. Summing those streams is not comparable to a year
-    that counted only one of them, so such segments are removed from the
-    match universe.
-    """
+    """Exclude segments recording several count streams under one interval key."""
     ambiguous = sorted(df.loc[df.duplicated(subset=key, keep=False), id_col].unique())
     if ambiguous:
         print(f"{year}: excluding multi-stream segments: {', '.join(map(str, ambiguous))}")
         df = df[~df[id_col].isin(ambiguous)].copy()
     return df
+
+
+def add_hour(df: pd.DataFrame, time_col: str) -> pd.DataFrame:
+    df = df.copy()
+    df["hour"] = pd.to_datetime(df[time_col].astype(str), format="%H:%M:%S").dt.hour
+    return df
+
+
+def summarize_daily_volume(df: pd.DataFrame, group_cols: list[str], date_col: str, hour_col: str, volume_col: str) -> pd.DataFrame:
+    hourly = (df.groupby(group_cols + [date_col, hour_col], as_index=False)
+                .agg(hourly_volume=(volume_col, "sum")))
+    hourly_avg = (hourly.groupby(group_cols + [hour_col], as_index=False)
+                  .agg(avg_hourly_volume=("hourly_volume", "mean")))
+    return (hourly_avg.groupby(group_cols)
+            .agg(hours=(hour_col, "nunique"),
+                 midweek_avg_daily_volume=("avg_hourly_volume", "sum"))
+            .reset_index())
 
 
 def load_parquet_year(year: int):
@@ -101,9 +111,8 @@ def load_parquet_year(year: int):
     df = df[df["day_name"].isin(MIDWEEK)].copy()
     df = drop_multi_stream_segments(
         df, ["segment_id", "date", "start_time", "direction_of_travel"], "segment_id", year)
-    df["hour"] = pd.to_datetime(df["start_time"].astype(str), format="%H:%M:%S").dt.hour
-    hourly = (df.groupby(["segment_id", "date", "hour"], as_index=False)
-                .agg(hourly_volume=("count", "sum")))
+    df = add_hour(df, "start_time")
+
     loc = (df.groupby("segment_id")
         .agg(location_1=("location_1", "first"), location_2=("location_2", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
@@ -111,20 +120,26 @@ def load_parquet_year(year: int):
              direction_count=("direction_of_travel", lambda x: x.dropna().nunique()),
              records=("count", "size"))
         .reset_index())
-    days = (df.groupby("segment_id")
-              .agg(days=("date", "nunique"))
-              .reset_index())
-    hourly_avg = (hourly.groupby(["segment_id", "hour"], as_index=False)
-                  .agg(avg_hourly_volume=("hourly_volume", "mean")))
-    hourly_stats = (hourly_avg.groupby("segment_id")
-                    .agg(hours=("hour", "nunique"),
-                         midweek_avg_daily_volume=("avg_hourly_volume", "sum"))
-                    .reset_index())
+    days = df.groupby("segment_id").agg(days=("date", "nunique")).reset_index()
+    hourly_stats = summarize_daily_volume(df, ["segment_id"], "date", "hour", "count")
     loc = loc.merge(days, on="segment_id", how="left").merge(hourly_stats, on="segment_id", how="left")
     loc["label"] = loc["location_1"] + " " + loc["location_2"]
     loc["norm_label"] = loc["label"].map(norm)
     loc["year"] = year
-    return loc
+
+    dir_loc = (df.groupby(["segment_id", "direction_of_travel"])
+        .agg(location_1=("location_1", "first"), location_2=("location_2", "first"),
+             latitude=("latitude", "mean"), longitude=("longitude", "mean"),
+             records=("count", "size"), days=("date", "nunique"))
+        .reset_index())
+    dir_stats = summarize_daily_volume(df, ["segment_id", "direction_of_travel"], "date", "hour", "count")
+    dir_loc = dir_loc.merge(dir_stats, on=["segment_id", "direction_of_travel"], how="left")
+    dir_loc["label"] = dir_loc["location_1"] + " " + dir_loc["location_2"]
+    dir_loc["norm_label"] = dir_loc["label"].map(norm)
+    dir_loc["directions"] = dir_loc["direction_of_travel"].map(lambda x: (x,))
+    dir_loc["direction_count"] = 1
+    dir_loc["year"] = year
+    return loc, dir_loc
 
 
 def parse_point(wkt):
@@ -142,29 +157,33 @@ def load_2025():
     transformer = Transformer.from_crs("EPSG:2263", "EPSG:4326", always_xy=True)
     lon, lat = transformer.transform(df["x"].to_numpy(), df["y"].to_numpy())
     df["longitude"] = lon; df["latitude"] = lat
-    hourly = (df.groupby(["base_id", "Date", "Hour"], as_index=False)
-                .agg(hourly_volume=("Volume", "sum")))
     loc = (df.groupby("base_id")
-        .agg(street=("street", "first"), fromSt=("fromSt", "first"), toSt=("toSt", "first"),
+        .agg(segment_id_2025=("SegmentId", "first"), street=("street", "first"), fromSt=("fromSt", "first"), toSt=("toSt", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
              directions=("Direction", lambda x: tuple(sorted(set(x.dropna())))),
              direction_count=("Direction", lambda x: x.dropna().nunique()),
              records=("Volume", "size"))
         .reset_index())
-    days = (df.groupby("base_id")
-              .agg(days=("Date", "nunique"))
-              .reset_index())
-    hourly_avg = (hourly.groupby(["base_id", "Hour"], as_index=False)
-                  .agg(avg_hourly_volume=("hourly_volume", "mean")))
-    hourly_stats = (hourly_avg.groupby("base_id")
-                    .agg(hours=("Hour", "nunique"),
-                         midweek_avg_daily_volume=("avg_hourly_volume", "sum"))
-                    .reset_index())
+    days = df.groupby("base_id").agg(days=("Date", "nunique")).reset_index()
+    hourly_stats = summarize_daily_volume(df, ["base_id"], "Date", "Hour", "Volume")
     loc = loc.merge(days, on="base_id", how="left").merge(hourly_stats, on="base_id", how="left")
     loc["label"] = loc["street"] + " between " + loc["fromSt"] + " and " + loc["toSt"]
     loc["norm_label"] = loc["label"].map(norm)
     loc["year"] = 2025
     return loc
+
+
+def score_match(a, b):
+    dist = haversine_m(a.latitude, a.longitude, b.latitude, b.longitude)
+    score = fuzz.token_set_ratio(a.norm_label, b.norm_label)
+    match_tier = None
+    if dist <= MAX_DISTANCE_M and score >= MIN_TEXT_SCORE:
+        match_tier = "text_and_distance"
+    elif dist <= CLOSE_DISTANCE_M and score >= CLOSE_TEXT_SCORE:
+        match_tier = "close_distance"
+    elif dist <= VERY_CLOSE_DISTANCE_M and score >= VERY_CLOSE_TEXT_SCORE:
+        match_tier = "very_close_distance"
+    return dist, score, match_tier
 
 
 def match_pair(left: pd.DataFrame, right: pd.DataFrame, left_key: str, right_key: str, left_out: str, right_out: str) -> pd.DataFrame:
@@ -175,15 +194,7 @@ def match_pair(left: pd.DataFrame, right: pd.DataFrame, left_key: str, right_key
                 continue
             if tuple(a.directions) != tuple(b.directions):
                 continue
-            dist = haversine_m(a.latitude, a.longitude, b.latitude, b.longitude)
-            score = fuzz.token_set_ratio(a.norm_label, b.norm_label)
-            match_tier = None
-            if dist <= MAX_DISTANCE_M and score >= MIN_TEXT_SCORE:
-                match_tier = "text_and_distance"
-            elif dist <= CLOSE_DISTANCE_M and score >= CLOSE_TEXT_SCORE:
-                match_tier = "close_distance"
-            elif dist <= VERY_CLOSE_DISTANCE_M and score >= VERY_CLOSE_TEXT_SCORE:
-                match_tier = "very_close_distance"
+            dist, score, match_tier = score_match(a, b)
             if match_tier is None:
                 continue
             rows.append({
@@ -207,15 +218,209 @@ def match_pair(left: pd.DataFrame, right: pd.DataFrame, left_key: str, right_key
         selected.append(row)
         used_left.add(row[left_out])
         used_right.add(row[right_out])
-    return pd.DataFrame(selected).drop(columns=["confidence"])
+    return pd.DataFrame(selected).drop(columns=["confidence", "partner_priority"], errors="ignore")
+
+
+def partner_priority_keys() -> set[tuple[int, str]]:
+    partner_path = OUT / "dot_yoy_analysis.csv"
+    if not partner_path.exists():
+        return set()
+    partner = pd.read_csv(partner_path)
+    partner = partner[partner["2024"].notna() & (partner["2024"].astype(str).str.strip() != "")]
+    return set(zip(partner["SegmentId"].astype(int), partner["Direction"].astype(str)))
+
+
+def match_direction_splits(y24: pd.DataFrame, y25_unmatched: pd.DataFrame, priority_keys: set[tuple[int, str]] | None = None) -> pd.DataFrame:
+    priority_keys = priority_keys or set()
+    rows = []
+    for _, a in y24.iterrows():
+        if int(a.direction_count) <= 1:
+            continue
+        for _, b in y25_unmatched.iterrows():
+            if int(b.direction_count) != 1:
+                continue
+            direction = b.directions[0]
+            if direction not in tuple(a.directions):
+                continue
+            dist, score, match_tier = score_match(a, b)
+            if match_tier is None:
+                continue
+            rows.append({
+                "segment_id_2024": a.segment_id,
+                "base_id_2025": b.base_id,
+                "matched_direction": direction,
+                "distance_m_2024_2025": round(dist, 1),
+                "text_score_2024_2025": round(score, 1),
+                "match_tier_2024_2025": f"direction_split_{match_tier}",
+                "partner_priority": int((int(b.segment_id_2025), direction) in priority_keys),
+                "confidence": score + max(MAX_DISTANCE_M - dist, 0) / 10,
+            })
+    candidates = pd.DataFrame(rows)
+    if candidates.empty:
+        return candidates
+    selected = []
+    used_direction_pairs = set()
+    used_2025 = set()
+    for _, row in candidates.sort_values(
+        ["partner_priority", "confidence", "text_score_2024_2025", "distance_m_2024_2025"],
+        ascending=[False, False, False, True],
+    ).iterrows():
+        direction_pair = (row.segment_id_2024, row.matched_direction)
+        if direction_pair in used_direction_pairs or row.base_id_2025 in used_2025:
+            continue
+        selected.append(row)
+        used_direction_pairs.add(direction_pair)
+        used_2025.add(row.base_id_2025)
+    return pd.DataFrame(selected).drop(columns=["confidence", "partner_priority"], errors="ignore")
 
 
 def pct_change(new: float, old: float) -> float:
     return round((new - old) / old * 100, 2)
 
 
+def empty_history_fields(row: dict) -> None:
+    row.update({
+        "segment_id_2023": "", "location_2023": "", "latitude_2023": "", "longitude_2023": "",
+        "distance_m_2023_2024": "", "text_score_2023_2024": "", "match_tier_2023_2024": "",
+        "directions_2023": "", "midweek_avg_daily_volume_2023": "", "pct_change_2023_2024": "",
+        "pct_change_2023_2025": "", "days_2023": "", "hours_2023": "", "records_2023": "",
+    })
+
+
+def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=None, match_23_24=None, match_type="strict_one_to_one"):
+    use_directional_2024 = match_type == "direction_split"
+    b = y25_lookup.loc[m.base_id_2025]
+    if use_directional_2024:
+        direction = m.matched_direction
+        a = y24_dir_lookup.loc[(m.segment_id_2024, direction)]
+        segment_a = y24_lookup.loc[m.segment_id_2024]
+        location_2024 = segment_a.label
+        directions_2024 = direction
+        midweek_2024 = a.midweek_avg_daily_volume
+        days_2024, hours_2024, records_2024 = int(a.days), int(a.hours), int(a.records)
+    else:
+        a = y24_lookup.loc[m.segment_id_2024]
+        location_2024 = a.label
+        directions_2024 = ";".join(a.directions)
+        midweek_2024 = a.midweek_avg_daily_volume
+        days_2024, hours_2024, records_2024 = int(a.days), int(a.hours), int(a.records)
+
+    row = {
+        "segment_id_2024": m.segment_id_2024,
+        "base_id_2025": int(m.base_id_2025),
+        "segment_id_2025": int(b.segment_id_2025),
+        "display_name": display_label(location_2024),
+        "location_2024": location_2024,
+        "location_2025": b.label,
+        "latitude": round((a.latitude + b.latitude) / 2, 6),
+        "longitude": round((a.longitude + b.longitude) / 2, 6),
+        "latitude_2024": round(a.latitude, 6),
+        "longitude_2024": round(a.longitude, 6),
+        "latitude_2025": round(b.latitude, 6),
+        "longitude_2025": round(b.longitude, 6),
+        "distance_m_2024_2025": m.distance_m_2024_2025,
+        "text_score_2024_2025": m.text_score_2024_2025,
+        "match_tier_2024_2025": m.match_tier_2024_2025,
+        "match_type": match_type,
+        "volume_comparability": "direction_exact" if use_directional_2024 else "direction_set_exact",
+        "needs_review": "TRUE" if use_directional_2024 else "FALSE",
+        "strict_reject_reason": "direction_set_mismatch" if use_directional_2024 else "",
+        "direction_count": 1 if use_directional_2024 else int(a.direction_count),
+        "directions_2024": directions_2024,
+        "directions_2025": ";".join(b.directions),
+        "midweek_avg_daily_volume_2024": round(midweek_2024, 2),
+        "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
+        "pct_change_2024_2025": pct_change(b.midweek_avg_daily_volume, midweek_2024),
+        "days_2024": days_2024, "days_2025": int(b.days),
+        "hours_2024": hours_2024, "hours_2025": int(b.hours),
+        "records_2024": records_2024, "records_2025": int(b.records),
+    }
+    empty_history_fields(row)
+    if match_type == "strict_one_to_one" and match_23_24 is not None and y23_lookup is not None and pd.notna(match_23_24.segment_id_2023):
+        c = y23_lookup.loc[match_23_24.segment_id_2023]
+        row.update({
+            "segment_id_2023": match_23_24.segment_id_2023,
+            "location_2023": c.label,
+            "latitude_2023": round(c.latitude, 6),
+            "longitude_2023": round(c.longitude, 6),
+            "distance_m_2023_2024": match_23_24.distance_m_2023_2024,
+            "text_score_2023_2024": match_23_24.text_score_2023_2024,
+            "match_tier_2023_2024": match_23_24.match_tier_2023_2024,
+            "directions_2023": ";".join(c.directions),
+            "midweek_avg_daily_volume_2023": round(c.midweek_avg_daily_volume, 2),
+            "pct_change_2023_2024": pct_change(midweek_2024, c.midweek_avg_daily_volume),
+            "pct_change_2023_2025": pct_change(b.midweek_avg_daily_volume, c.midweek_avg_daily_volume),
+            "days_2023": int(c.days), "hours_2023": int(c.hours), "records_2023": int(c.records),
+        })
+    return row
+
+
+def strict_reject_reason(a, b, dist, score):
+    if int(a.direction_count) != int(b.direction_count):
+        return "direction_count_mismatch"
+    if tuple(a.directions) != tuple(b.directions):
+        return "direction_set_mismatch"
+    if dist > MAX_DISTANCE_M:
+        return "too_far"
+    if score < VERY_CLOSE_TEXT_SCORE:
+        return "text_too_low"
+    return "below_confidence_tier"
+
+
+def write_partner_gap_audit(y24: pd.DataFrame, y25: pd.DataFrame, matched_base_ids: set[int]) -> None:
+    partner_path = OUT / "dot_yoy_analysis.csv"
+    if not partner_path.exists():
+        return
+    partner = pd.read_csv(partner_path)
+    partner_keys = partner[["SegmentId", "Direction", "street", "fromSt", "toSt", "2024", "2025", "perc_change"]].drop_duplicates()
+    audit_rows = []
+    y25_partner = y25.copy()
+    y25_partner["SegmentId"] = y25_partner["segment_id_2025"].astype(int)
+    y25_partner["Direction"] = y25_partner["directions"].map(lambda d: d[0] if len(d) == 1 else ";".join(d))
+    for _, p in partner_keys.iterrows():
+        possible_2025 = y25_partner[(y25_partner["SegmentId"] == int(p.SegmentId)) & (y25_partner["Direction"] == p.Direction)]
+        if possible_2025.empty:
+            status = "partner_row_not_in_2025_midweek_base"
+            audit_rows.append({**p.to_dict(), "match_status": status})
+            continue
+        b = possible_2025.iloc[0]
+        if int(b.base_id) in matched_base_ids:
+            status = "matched"
+        else:
+            status = "unmatched"
+        nearest = []
+        for _, a in y24.iterrows():
+            dist = haversine_m(a.latitude, a.longitude, b.latitude, b.longitude)
+            if dist > 150:
+                continue
+            score = fuzz.token_set_ratio(a.norm_label, b.norm_label)
+            nearest.append((dist, score, a))
+        nearest.sort(key=lambda x: x[0])
+        if nearest:
+            dist, score, a = nearest[0]
+            reason = "" if status == "matched" else strict_reject_reason(a, b, dist, score)
+            recommendation = "already_matched" if status == "matched" else (
+                "manual_review_direction_split" if p.Direction in tuple(a.directions) else "manual_review")
+            audit_rows.append({
+                **p.to_dict(), "base_id_2025": int(b.base_id), "match_status": status,
+                "nearest_segment_id_2024": a.segment_id, "nearest_location_2024": a.label,
+                "nearest_directions_2024": ";".join(a.directions),
+                "distance_m": round(dist, 1), "text_score": round(score, 1),
+                "strict_reject_reason": reason, "recommendation": recommendation,
+            })
+        else:
+            audit_rows.append({
+                **p.to_dict(), "base_id_2025": int(b.base_id), "match_status": status,
+                "strict_reject_reason": "no_2024_candidate_within_150m",
+                "recommendation": "manual_review",
+            })
+    pd.DataFrame(audit_rows).to_csv(OUT / "atr_partner_gap_review.csv", index=False)
+
+
 def main():
-    y23, y24, y25 = load_parquet_year(2023), load_parquet_year(2024), load_2025()
+    y23, _y23_dir = load_parquet_year(2023)
+    y24, y24_dir = load_parquet_year(2024)
+    y25 = load_2025()
 
     matches_24_25 = match_pair(y24, y25, "segment_id", "base_id", "segment_id_2024", "base_id_2025").rename(columns={
         "distance_m": "distance_m_2024_2025",
@@ -228,71 +433,34 @@ def main():
         "match_tier": "match_tier_2023_2024",
     })
 
+    used_2025 = set(matches_24_25["base_id_2025"].astype(int)) if not matches_24_25.empty else set()
+    y25_unmatched = y25[~y25["base_id"].astype(int).isin(used_2025)]
+    direction_matches = match_direction_splits(y24, y25_unmatched, partner_priority_keys())
+
     joined = matches_24_25.merge(matches_23_24, on="segment_id_2024", how="left")
     y23_lookup = y23.set_index("segment_id")
     y24_lookup = y24.set_index("segment_id")
+    y24_dir_lookup = y24_dir.set_index(["segment_id", "direction_of_travel"])
     y25_lookup = y25.set_index("base_id")
 
     rows = []
     for _, m in joined.iterrows():
-        a = y24_lookup.loc[m.segment_id_2024]
-        b = y25_lookup.loc[m.base_id_2025]
-        row = {
-            "segment_id_2023": m.segment_id_2023 if pd.notna(m.segment_id_2023) else "",
-            "segment_id_2024": m.segment_id_2024,
-            "base_id_2025": int(m.base_id_2025),
-            "display_name": display_label(a.label),
-            "location_2023": "",
-            "location_2024": a.label,
-            "location_2025": b.label,
-            "latitude": round((a.latitude + b.latitude) / 2, 6),
-            "longitude": round((a.longitude + b.longitude) / 2, 6),
-            "latitude_2024": round(a.latitude, 6),
-            "longitude_2024": round(a.longitude, 6),
-            "latitude_2025": round(b.latitude, 6),
-            "longitude_2025": round(b.longitude, 6),
-            "distance_m_2024_2025": m.distance_m_2024_2025,
-            "text_score_2024_2025": m.text_score_2024_2025,
-            "match_tier_2024_2025": m.match_tier_2024_2025,
-            "distance_m_2023_2024": m.distance_m_2023_2024 if pd.notna(m.segment_id_2023) else "",
-            "text_score_2023_2024": m.text_score_2023_2024 if pd.notna(m.segment_id_2023) else "",
-            "match_tier_2023_2024": m.match_tier_2023_2024 if pd.notna(m.segment_id_2023) else "",
-            "direction_count": int(a.direction_count),
-            "directions_2024": ";".join(a.directions),
-            "directions_2025": ";".join(b.directions),
-            "midweek_avg_daily_volume_2023": "",
-            "midweek_avg_daily_volume_2024": round(a.midweek_avg_daily_volume, 2),
-            "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
-            "pct_change_2024_2025": pct_change(b.midweek_avg_daily_volume, a.midweek_avg_daily_volume),
-            "pct_change_2023_2024": "",
-            "pct_change_2023_2025": "",
-            "days_2023": "", "days_2024": int(a.days), "days_2025": int(b.days),
-            "hours_2023": "", "hours_2024": int(a.hours), "hours_2025": int(b.hours),
-            "records_2023": "", "records_2024": int(a.records), "records_2025": int(b.records),
-        }
-        if pd.notna(m.segment_id_2023):
-            c = y23_lookup.loc[m.segment_id_2023]
-            row.update({
-                "location_2023": c.label,
-                "latitude_2023": round(c.latitude, 6),
-                "longitude_2023": round(c.longitude, 6),
-                "directions_2023": ";".join(c.directions),
-                "midweek_avg_daily_volume_2023": round(c.midweek_avg_daily_volume, 2),
-                "pct_change_2023_2024": pct_change(a.midweek_avg_daily_volume, c.midweek_avg_daily_volume),
-                "pct_change_2023_2025": pct_change(b.midweek_avg_daily_volume, c.midweek_avg_daily_volume),
-                "days_2023": int(c.days), "hours_2023": int(c.hours), "records_2023": int(c.records),
-            })
-        else:
-            row.update({"latitude_2023": "", "longitude_2023": "", "directions_2023": ""})
-        rows.append(row)
+        rows.append(build_output_row(m, y24_lookup, y25_lookup, y23_lookup=y23_lookup, match_23_24=m))
+    for _, m in direction_matches.iterrows():
+        rows.append(build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=y24_dir_lookup, match_type="direction_split"))
 
-    out = pd.DataFrame(rows).sort_values(["segment_id_2024", "base_id_2025"])
+    out = pd.DataFrame(rows).sort_values(["match_type", "segment_id_2024", "base_id_2025"])
     OUT.mkdir(exist_ok=True)
     out.to_csv(OUT / "atr_2023_2024_2025_midweek_matches.csv", index=False)
     out.to_csv(OUT / "atr_2024_2025_midweek_matches.csv", index=False)
+    write_partner_gap_audit(y24, y25, set(out["base_id_2025"].astype(int)))
+
+    strict_count = (out["match_type"] == "strict_one_to_one").sum()
+    split_count = (out["match_type"] == "direction_split").sum()
     matched_2023 = out["segment_id_2023"].astype(bool).sum()
-    print(f"Matched {len(out)} confident 2024-2025 locations; {matched_2023} include 2023 history")
-    print(out[["segment_id_2023", "segment_id_2024", "base_id_2025", "midweek_avg_daily_volume_2023", "midweek_avg_daily_volume_2024", "midweek_avg_daily_volume_2025", "pct_change_2023_2024", "pct_change_2024_2025", "pct_change_2023_2025"]].to_string(index=False))
+    print(f"Matched {len(out)} 2024-2025 locations: {strict_count} strict and {split_count} direction-split; {matched_2023} include 2023 history")
+    print(out[["match_type", "segment_id_2023", "segment_id_2024", "base_id_2025", "segment_id_2025", "directions_2024", "directions_2025", "midweek_avg_daily_volume_2023", "midweek_avg_daily_volume_2024", "midweek_avg_daily_volume_2025", "pct_change_2023_2024", "pct_change_2024_2025", "pct_change_2023_2025"]].to_string(index=False))
+
 
 if __name__ == "__main__":
     main()
