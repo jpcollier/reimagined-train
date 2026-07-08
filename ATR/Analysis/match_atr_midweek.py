@@ -391,7 +391,8 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
         days_2024, hours_2024, records_2024 = int(a.days), int(a.hours), int(a.records)
 
     directions_2025 = ";".join(b.directions)
-    display_name = f"{display_label(location_2024)} — {format_direction_pair(directions_2024, directions_2025)}"
+    direction_display = format_direction_pair(directions_2024, directions_2025)
+    display_name = f"{display_label(location_2024)} — {direction_display}"
 
     row = {
         "segment_id_2024": m.segment_id_2024,
@@ -416,6 +417,7 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
         "direction_count": 1 if use_directional_2024 else int(a.direction_count),
         "directions_2024": directions_2024,
         "directions_2025": directions_2025,
+        "direction_display": direction_display,
         "midweek_avg_daily_volume_2024": round(midweek_2024, 2),
         "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
         "pct_change_2024_2025": pct_change(b.midweek_avg_daily_volume, midweek_2024),
@@ -441,6 +443,13 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
             "days_2023": int(c.days), "hours_2023": int(c.hours), "records_2023": int(c.records),
         })
     return row
+
+
+def ordered_columns(frame: pd.DataFrame, primary_columns: list[str]) -> list[str]:
+    """Return primary columns first, followed by all remaining generated fields."""
+    primary = [column for column in primary_columns if column in frame.columns]
+    remaining = [column for column in frame.columns if column not in primary]
+    return primary + remaining
 
 
 def strict_reject_reason(a, b, dist, score):
@@ -538,6 +547,22 @@ def main():
         rows.append(build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=y24_dir_lookup, match_type="direction_split"))
 
     out = pd.DataFrame(rows).sort_values(["match_type", "segment_id_2024", "base_id_2025"])
+    out = out[ordered_columns(out, [
+        "display_name",
+        "segment_id_2024",
+        "base_id_2025",
+        "location_2024",
+        "location_2025",
+        "directions_2024",
+        "directions_2025",
+        "direction_display",
+        "pct_change_2024_2025",
+        "midweek_avg_daily_volume_2024",
+        "midweek_avg_daily_volume_2025",
+        "match_type",
+        "volume_comparability",
+        "needs_review",
+    ])]
     OUT.mkdir(exist_ok=True)
     out.to_csv(OUT / "atr_2023_2024_2025_midweek_matches.csv", index=False)
     out.to_csv(OUT / "atr_2024_2025_midweek_matches.csv", index=False)
