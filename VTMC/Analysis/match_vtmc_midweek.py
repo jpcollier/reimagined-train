@@ -235,6 +235,13 @@ def match_tier_for(dist: float, score: float) -> str | None:
     return None
 
 
+def ordered_columns(frame: pd.DataFrame, primary_columns: list[str]) -> list[str]:
+    """Return primary columns first, followed by all remaining generated fields."""
+    primary = [column for column in primary_columns if column in frame.columns]
+    remaining = [column for column in frame.columns if column not in primary]
+    return primary + remaining
+
+
 def main():
     y24, y25 = load_year(2024), load_year(2025)
     rows = []
@@ -288,6 +295,19 @@ def main():
                 continue
             selected.append(row); used_2024.add(row.node_id_2024); used_2025.add(row.node_id_2025)
         out = pd.DataFrame(selected).sort_values(["node_id_2024", "node_id_2025"]).drop(columns=["confidence"])
+    out = out[ordered_columns(out, [
+        "display_name",
+        "node_id_2024",
+        "node_id_2025",
+        "location_2024",
+        "location_2025",
+        "pct_change",
+        "midweek_avg_daily_volume_2024",
+        "midweek_avg_daily_volume_2025",
+        "streams_shared",
+        "stream_coverage_2024",
+        "stream_coverage_2025",
+    ])]
     OUT.mkdir(exist_ok=True)
     out.to_csv(OUT / "vtmc_2024_2025_midweek_matches.csv", index=False)
     print(f"Matched {len(out)} confident locations")
