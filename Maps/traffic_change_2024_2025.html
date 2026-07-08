@@ -43,15 +43,42 @@
         `<b>Change:</b> ${change}%<br><b>2024 volume:</b> ${volume2024}<br><b>2025 volume:</b> ${volume2025}`;
     }
 
+    const overlapGroups = new Map();
     for (const point of points) {
-      const latlng = [point.lat, point.lon];
-      bounds.push(latlng);
-      const options = { radius: 7, color: '#333', weight: 1, fillColor: point.color, fillOpacity: 0.82 };
-      const marker = point.dataset === 'ATR'
-        ? L.circleMarker(latlng, options)
-        : L.marker(latlng, { icon: L.divIcon({ className: '', html: `<span style="display:block;width:13px;height:13px;background:${point.color};border:1px solid #333;"></span>`, iconSize: [13, 13] }) });
-      marker.bindPopup(popup(point));
-      marker.addTo(layers[point.dataset]);
+      const key = `${point.dataset}:${point.lat.toFixed(6)},${point.lon.toFixed(6)}`;
+      if (!overlapGroups.has(key)) {
+        overlapGroups.set(key, []);
+      }
+      overlapGroups.get(key).push(point);
+    }
+
+    function offsetLatLng(point, index, total) {
+      const base = L.latLng(point.lat, point.lon);
+      if (total < 2) {
+        return base;
+      }
+
+      // Spread same-coordinate markers side-by-side on the screen so directional
+      // pairs such as EB/WB counts can both be clicked without changing the data.
+      const angle = total === 2 ? (index === 0 ? Math.PI : 0) : (2 * Math.PI * index) / total;
+      const offsetMeters = 10;
+      const earthRadiusMeters = 6378137;
+      const latOffset = (Math.sin(angle) * offsetMeters / earthRadiusMeters) * (180 / Math.PI);
+      const lonOffset = (Math.cos(angle) * offsetMeters / (earthRadiusMeters * Math.cos(base.lat * Math.PI / 180))) * (180 / Math.PI);
+      return L.latLng(base.lat + latOffset, base.lng + lonOffset);
+    }
+
+    for (const group of overlapGroups.values()) {
+      group.forEach((point, index) => {
+        const latlng = offsetLatLng(point, index, group.length);
+        bounds.push([point.lat, point.lon]);
+        const options = { radius: 7, color: '#333', weight: 1, fillColor: point.color, fillOpacity: 0.82 };
+        const marker = point.dataset === 'ATR'
+          ? L.circleMarker(latlng, options)
+          : L.marker(latlng, { icon: L.divIcon({ className: '', html: `<span style="display:block;width:13px;height:13px;background:${point.color};border:1px solid #333;"></span>`, iconSize: [13, 13] }) });
+        marker.bindPopup(popup(point));
+        marker.addTo(layers[point.dataset]);
+      });
     }
 
     layers.ATR.addTo(map);
