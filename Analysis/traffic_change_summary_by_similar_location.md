@@ -1,71 +1,92 @@
-# 2024 vs 2025 Traffic Count Summary by Similar Location
+# 2024 vs 2025 Traffic Count Summary by Location Group Label
 
-Presentation-ready summary of matched ATR and VTMC locations. Values are summed midweek average daily volumes across each similar-location group; percent change is calculated from the summed 2024 and 2025 values.
+Presentation-ready list of matched ATR and VTMC count locations. Each row is an individual count location; the location group is only a label for sorting or slide grouping, and volumes are not rolled up across locations.
 
 ## ATR
 
-| Similar location group | Count locations | 2024 value | 2025 value | % change |
-|---|---:|---:|---:|---:|
-| 1 Avenue | 3 | 37,553 | 30,646 | -18.4% |
-| 2 Avenue | 1 | 24,946 | 20,519 | -17.7% |
-| 65th Street | 2 | 26,236 | 24,354 | -7.2% |
-| 79th Street | 2 | 20,080 | 77,494 | +285.9% |
-| 8th Avenue | 1 | 15,670 | 14,426 | -7.9% |
-| 9th Avenue | 3 | 62,397 | 62,307 | -0.1% |
-| Borden Ave | 1 | 24,652 | 36,610 | +48.5% |
-| Canal Street | 2 | 33,850 | 33,259 | -1.7% |
-| Columbia Street | 2 | 5,336 | 4,916 | -7.9% |
-| East 34th Street | 2 | 17,498 | 15,697 | -10.3% |
-| East 61 Street | 1 | 5,985 | 5,536 | -7.5% |
-| East 63rd Street | 1 | 12,481 | 12,901 | +3.4% |
-| Ent From Van Dam Street and Van Dam Street | 1 | 1,272 | 1,075 | -15.5% |
-| Exit From LIE Lie | 1 | 20,866 | 25,303 | +21.3% |
-| FDR Drive | 5 | 259,035 | 268,168 | +3.5% |
-| Ferry Terminal | 1 | 3,748 | 3,820 | +1.9% |
-| Ferry Terminal Viaduct | 1 | 3,181 | 3,760 | +18.2% |
-| Grand Central Parkway BQE | 2 | 205,125 | 193,472 | -5.7% |
-| Henry Hudson Parkway Ramp | 1 | 61,267 | 56,323 | -8.1% |
-| Henry Hudson Parkway Ramp 1 | 1 | 65,367 | 66,948 | +2.4% |
-| Major Deegan Depot Place | 2 | 92,439 | 88,610 | -4.1% |
-| Queen Midtown Tunnel | 2 | 8,904 | 10,254 | +15.2% |
-| Queens Blvd | 2 | 27,141 | 27,936 | +2.9% |
-| Route 9A | 4 | 97,233 | 136,304 | +40.2% |
-| Route 9A & W 42nd Street | 1 | 34,941 | 43,175 | +23.6% |
-| Route 9A W. 24th St | 1 | 25,932 | 34,933 | +34.7% |
-| West 34th Street | 2 | 16,375 | 16,291 | -0.5% |
-| West 62nd St | 2 | 5,280 | 5,203 | -1.5% |
-| West Houston Street | 2 | 23,892 | 29,898 | +25.1% |
+| Location group | Count location | 2024 value | 2025 value | % change |
+|---|---|---:|---:|---:|
+| 1 Avenue | 1 Avenue between E 13th St and E 14th St (27P2) | 21,103 | 17,329 | -17.9% |
+| 1 Avenue | 1 Avenue between Stanton St and E Houston St (29P2) | 4,805 | 3,543 | -26.3% |
+| 1 Avenue | 1 Avenue between Stanton St and E Houston St (29P2) | 11,644 | 9,774 | -16.1% |
+| 2 Avenue | 2 Avenue between E 14th St and E 15th St (28P2) | 24,946 | 20,519 | -17.7% |
+| 65th Street | 65th Street between 5th Ave and CPW (14P4) | 12,875 | 11,362 | -11.8% |
+| 65th Street | 65th Street between 5th Ave and CPW (15P4) | 13,360 | 12,992 | -2.8% |
+| 79th Street | 79th Street EB at Riverside Drive (22P3A3B) | 8,826 | 66,948 | +658.6% |
+| 79th Street | 79th Street EB at Riverside Drive (22P3A3B) | 11,255 | 10,546 | -6.3% |
+| 8th Avenue | 8th Avenue between W 41st St and W 42nd St (9P1) | 15,670 | 14,426 | -7.9% |
+| 9th Avenue | 9th Avenue SB between 34th St and 33rd St (11P1) | 21,953 | 20,011 | -8.8% |
+| 9th Avenue | 9th Avenue SB between W 42nd St and W 43rd St (10P1) | 23,736 | 24,312 | +2.4% |
+| 9th Avenue | 9th Avenue between W 22nd St and 23rd St (15P1) | 16,708 | 17,984 | +7.6% |
+| Borden Ave | Borden Ave On Ramp at LIE EB 1 (35P2) | 24,652 | 36,610 | +48.5% |
+| Canal Street | Canal Street EB between Walker St and Mulberry St (33P2) | 18,825 | 18,330 | -2.6% |
+| Canal Street | Canal Street EB between Walker St and Mulberry St (33P2) | 15,025 | 14,929 | -0.6% |
+| Columbia Street | Columbia Street NB between Rivington St and E Houston St (26P2) | 2,602 | 2,167 | -16.7% |
+| Columbia Street | Columbia Street NB between Rivington St and E Houston St (26P2) | 2,733 | 2,749 | +0.6% |
+| East 34th Street | East 34th Street WB between 3rd Ave and Lexington Ave (51P4) | 8,237 | 8,497 | +3.1% |
+| East 34th Street | East 34th Street between Lexington Ave and 3rd Ave (1B3) | 9,260 | 7,201 | -22.2% |
+| East 61 Street | East 61 Street between Lexington Ave and 3rd Ave (12P1) | 5,985 | 5,536 | -7.5% |
+| East 63rd Street | East 63rd Street at York Avenue (3P3A3B) | 12,481 | 12,901 | +3.4% |
+| Ent From Van Dam Street and Van Dam Street | Ent From Van Dam Street and Van Dam Street (49P2) | 1,272 | 1,075 | -15.5% |
+| Exit From LIE Lie | Exit From LIE Lie (48P2) | 20,866 | 25,303 | +21.3% |
+| FDR Drive | FDR Dr On Ramp at 63rd Street (23P3A3B) | 14,923 | 12,485 | -16.3% |
+| FDR Drive | FDR Dr between E Houston Street and E 6th Street NB (46P4) | 57,315 | 67,232 | +17.3% |
+| FDR Drive | FDR Dr between E Houston Street and E 6th Street SB (47P4) | 68,102 | 71,689 | +5.3% |
+| FDR Drive | FDR Dr between Market Slip and Manhattan Bridge (44P4) | 58,079 | 57,604 | -0.8% |
+| FDR Drive | FDR Dr between Market Slip and Manhattan Bridge (45P4) | 60,616 | 59,158 | -2.4% |
+| Ferry Terminal | Ferry Terminal Exit at Ferry Terminal Viaduct#1 (52P2) | 3,748 | 3,820 | +1.9% |
+| Ferry Terminal Viaduct | Ferry Terminal Viaduct and Richmond Terrace#1 (53P2) | 3,181 | 3,760 | +18.2% |
+| Grand Central Parkway BQE | Grand Central Parkway EB BQE (51P2) | 98,400 | 92,400 | -6.1% |
+| Grand Central Parkway BQE | Grand Central Parkway WB BQE (50P2) | 106,725 | 101,072 | -5.3% |
+| Henry Hudson Parkway Ramp | Henry Hudson Parkway Ramp (7P3A3B) | 61,267 | 56,323 | -8.1% |
+| Henry Hudson Parkway Ramp 1 | Henry Hudson Parkway Ramp 1 (9P3A3B) | 65,367 | 66,948 | +2.4% |
+| Major Deegan Depot Place | Major Deegan Depot Place NB (1P2) | 44,992 | 41,798 | -7.1% |
+| Major Deegan Depot Place | Major Deegan Depot Place NB (1P2) | 47,447 | 46,812 | -1.3% |
+| Queen Midtown Tunnel | Queen Midtown Tunnel Entrance at 21st Street (54P2) | 4,150 | 4,771 | +15.0% |
+| Queen Midtown Tunnel | Queen Midtown Tunnel Entrance at 50th Avenue (56P2) | 4,753 | 5,483 | +15.4% |
+| Queens Blvd | Queens Blvd between 38th St and 39th St (47P2) | 14,468 | 15,133 | +4.6% |
+| Queens Blvd | Queens Blvd between 39th St and 39th Place (46P2) | 12,673 | 12,803 | +1.0% |
+| Route 9A | 9A at 14th Street (15P3A3B) | 23,745 | 28,129 | +18.5% |
+| Route 9A | 9A at 14th Street SB (32P4) | 24,972 | 38,676 | +54.9% |
+| Route 9A | 9A at W. 24th Street (40P4) | 21,551 | 31,906 | +48.0% |
+| Route 9A | 9A between W 42nd St and W 41st St (37P4) | 26,965 | 37,594 | +39.4% |
+| Route 9A & W 42nd Street | 9A & W 42nd Street NB between W 42nd St and W 43rd St (4P3A3B) | 34,941 | 43,175 | +23.6% |
+| Route 9A W. 24th St | 9A W. 24th St and W 26th St (8P3A3B) | 25,932 | 34,933 | +34.7% |
+| West 34th Street | West 34th Street EB between 8th Ave and 9th Ave (1B6) | 7,679 | 8,076 | +5.2% |
+| West 34th Street | West 34th Street WB between 8th Ave and 9th Ave (55P4) | 8,696 | 8,215 | -5.5% |
+| West 62nd St | West 62nd St EB between Amsterdam Ave and Columbus Ave (13P1) | 3,436 | 3,054 | -11.1% |
+| West 62nd St | West 62nd St EB between Amsterdam Ave and Columbus Ave (13P1) | 1,844 | 2,149 | +16.6% |
+| West Houston Street | West Houston Street EB between West Broadway and Wooster St (53P4) | 9,138 | 11,665 | +27.6% |
+| West Houston Street | West Houston Street between Wooster St and West Broadway (2A8) | 14,753 | 18,233 | +23.6% |
 
 ## VTMC
 
-| Similar location group | Count locations | 2024 value | 2025 value | % change |
-|---|---:|---:|---:|---:|
-| 1st Ave | 1 | 21,962 | 22,387 | +1.9% |
-| 21st St | 1 | 26,595 | 29,938 | +12.6% |
-| 2nd Ave | 1 | 30,960 | 28,462 | -8.1% |
-| 3rd Ave | 3 | 108,594 | 114,589 | +5.5% |
-| 6th Ave | 1 | 40,330 | 41,187 | +2.1% |
-| 7th Ave | 2 | 55,094 | 61,508 | +11.6% |
-| 8th Ave | 2 | 49,059 | 48,864 | -0.4% |
-| 9th Ave | 3 | 97,411 | 93,112 | -4.4% |
-| Allen St | 1 | 13,157 | 14,857 | +12.9% |
-| Boerum Place | 1 | 40,429 | 39,909 | -1.3% |
-| Canal St | 1 | 35,552 | 31,235 | -12.1% |
-| Church St | 1 | 26,176 | 25,650 | -2.0% |
-| Flatbush Ave | 1 | 58,608 | 59,127 | +0.9% |
-| Flatbush Ave Ext | 1 | 92,156 | 88,322 | -4.2% |
-| Hicks St | 1 | 29,509 | 25,127 | -14.8% |
-| Lexington Ave | 1 | 31,451 | 32,571 | +3.6% |
-| Steinway St | 1 | 39,404 | 41,364 | +5.0% |
-| Thompson Ave | 1 | 39,068 | 46,200 | +18.3% |
-| Union Square | 1 | 26,476 | 26,144 | -1.3% |
-| Water St | 1 | 21,287 | 21,322 | +0.2% |
-| West Broadway | 1 | 29,337 | 35,456 | +20.9% |
-
-## Source totals
-
-| Source | Count locations | 2024 value | 2025 value | % change |
-|---|---:|---:|---:|---:|
-| ATR | 52 | 1,238,682 | 1,350,138 | +9.0% |
-| VTMC | 27 | 912,615 | 927,331 | +1.6% |
-| Combined | 79 | 2,151,297 | 2,277,469 | +5.9% |
+| Location group | Count location | 2024 value | 2025 value | % change |
+|---|---|---:|---:|---:|
+| 1st Ave | 1st Ave at 13th St (27P2) | 21,962 | 22,387 | +1.9% |
+| 21st St | 21st St at 36th Ave (2B12) | 26,595 | 29,938 | +12.6% |
+| 2nd Ave | 2nd Ave at 14th St (28P2) | 30,960 | 28,462 | -8.1% |
+| 3rd Ave | 3rd Ave at 14th St (2A6) | 23,201 | 31,406 | +35.4% |
+| 3rd Ave | 3rd Ave at 34 St (1B3) | 40,672 | 41,876 | +3.0% |
+| 3rd Ave | 3rd Ave at 57th St (1A8) | 44,721 | 41,307 | -7.6% |
+| 6th Ave | 6th Ave at 23rd St (1B2) | 40,330 | 41,187 | +2.1% |
+| 7th Ave | 7th Ave at 14th St (2A7) | 24,772 | 29,362 | +18.5% |
+| 7th Ave | 7th Ave at 57th St (1A10) | 30,322 | 32,146 | +6.0% |
+| 8th Ave | 8th Ave at 34 St (1B6) | 28,632 | 29,036 | +1.4% |
+| 8th Ave | 8th Ave at 41 St (9P1) | 20,427 | 19,828 | -2.9% |
+| 9th Ave | 9th Ave at 22nd St (15P1) | 19,503 | 19,094 | -2.1% |
+| 9th Ave | 9th Ave at 34 St (11P1) | 36,274 | 35,819 | -1.3% |
+| 9th Ave | 9th Ave at 42 St (10P1) | 41,634 | 38,199 | -8.3% |
+| Allen St | Allen St at Stanton St (29P2) | 13,157 | 14,857 | +12.9% |
+| Boerum Place | Boerum Place at Atlantic Ave (2B3) | 40,429 | 39,909 | -1.3% |
+| Canal St | Canal St at Walker St (33P2) | 35,552 | 31,235 | -12.1% |
+| Church St | Church St at Chamber St (2A10) | 26,176 | 25,650 | -2.0% |
+| Flatbush Ave | Flatbush Ave at Atlantic Ave (2B8) | 58,608 | 59,127 | +0.9% |
+| Flatbush Ave Ext | Flatbush Ave Ext at Tillary St (2B1) | 92,156 | 88,322 | -4.2% |
+| Hicks St | Hicks St at Atlantic Ave (2B4) | 29,509 | 25,127 | -14.8% |
+| Lexington Ave | Lexington Ave at 42nd St (1B7) | 31,451 | 32,571 | +3.6% |
+| Steinway St | Steinway St at Northern Blvd (2B11) | 39,404 | 41,364 | +5.0% |
+| Thompson Ave | Thompson Ave at Van Dam St (2B10) | 39,068 | 46,200 | +18.3% |
+| Union Square | Union Square at 15th St (3A8) | 26,476 | 26,144 | -1.3% |
+| Water St | Water St at Fulton St (2A11) | 21,287 | 21,322 | +0.2% |
+| West Broadway | West Broadway at West Houston St (2A8) | 29,337 | 35,456 | +20.9% |
