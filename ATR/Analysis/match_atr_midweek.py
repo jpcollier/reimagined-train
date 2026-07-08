@@ -66,11 +66,18 @@ def norm(s: object) -> str:
 
 
 def display_label(label: object) -> str:
-    """Create a compact human-readable location label for tables."""
+    """Create a compact human-readable location label for tables.
+
+    Historical ATR location strings sometimes include direction tokens in the
+    location text itself (for example, ``79th Street EB at Riverside Drive``).
+    Display labels should keep the location clean so direction information can
+    be added from the dedicated direction columns instead of parsed from text.
+    """
     text = "" if pd.isna(label) else str(label)
     text = re.sub(r"^\s*\d+\s*_\s*ATR\s*_?", "", text, flags=re.IGNORECASE)
     text = text.replace("_", " ")
     text = re.sub(r"\bBtwn\b", "between", text, flags=re.IGNORECASE)
+    text = re.sub(r"\b(?:NB|SB|EB|WB)\b", " ", text, flags=re.IGNORECASE)
     text = re.sub(r"\s+", " ", text).strip(" -")
     titled = text.title()
     titled = re.sub(r"(\d+)(St|Nd|Rd|Th)\b", lambda m: m.group(1) + m.group(2).lower(), titled)
@@ -78,13 +85,36 @@ def display_label(label: object) -> str:
         " Fdr ": " FDR ", "Fdr ": "FDR ", " Lie ": " LIE ",
         " Bqe": " BQE", " Cpw": " CPW", " Ny-440": " NY-440",
         " M.L.K.": " M.L.K.", " W ": " W ", " E ": " E ",
-        " Nb": " NB", " Sb": " SB", " Eb": " EB", " Wb": " WB",
         " Between ": " between ", " And ": " and ", " At ": " at ",
     }
     padded = f" {titled} "
     for old, new in replacements.items():
         padded = padded.replace(old, new)
     return re.sub(r"\s+", " ", padded).strip()
+
+
+def format_direction_pair(directions_2024: object, directions_2025: object) -> str:
+    """Format the 2024/2025 direction relationship for display."""
+
+    def normalize(value: object) -> list[str]:
+        if isinstance(value, str):
+            parts = re.split(r"[;,/]", value)
+        else:
+            try:
+                parts = list(value)
+            except TypeError:
+                if pd.isna(value):
+                    return []
+                parts = [value]
+        return [str(part).strip().upper() for part in parts if str(part).strip()]
+
+    left = normalize(directions_2024)
+    right = normalize(directions_2025)
+    left_label = "/".join(left) if left else "n/a"
+    right_label = "/".join(right) if right else "n/a"
+    if left == right:
+        return left_label
+    return f"{left_label} → {right_label}"
 
 
 def haversine_m(lat1, lon1, lat2, lon2):
@@ -335,11 +365,14 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
         midweek_2024 = a.midweek_avg_daily_volume
         days_2024, hours_2024, records_2024 = int(a.days), int(a.hours), int(a.records)
 
+    directions_2025 = ";".join(b.directions)
+    display_name = f"{display_label(location_2024)} — {format_direction_pair(directions_2024, directions_2025)}"
+
     row = {
         "segment_id_2024": m.segment_id_2024,
         "base_id_2025": int(m.base_id_2025),
         "segment_id_2025": int(b.segment_id_2025),
-        "display_name": display_label(location_2024),
+        "display_name": display_name,
         "location_2024": location_2024,
         "location_2025": b.label,
         "latitude": round((a.latitude + b.latitude) / 2, 6),
@@ -357,7 +390,7 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
         "strict_reject_reason": ("partner_full_value_override" if use_directional_2024 and bool(getattr(m, "partner_override", False)) else ("direction_methodology_mismatch" if use_directional_2024 and bool(getattr(m, "direction_methodology_mismatch", False)) else ("direction_set_mismatch" if use_directional_2024 else ""))),
         "direction_count": 1 if use_directional_2024 else int(a.direction_count),
         "directions_2024": directions_2024,
-        "directions_2025": ";".join(b.directions),
+        "directions_2025": directions_2025,
         "midweek_avg_daily_volume_2024": round(midweek_2024, 2),
         "midweek_avg_daily_volume_2025": round(b.midweek_avg_daily_volume, 2),
         "pct_change_2024_2025": pct_change(b.midweek_avg_daily_volume, midweek_2024),
