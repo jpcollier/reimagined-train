@@ -43,6 +43,52 @@ def marker_color(change: float) -> str:
     return "#e31a1c"
 
 
+def point_key(point: dict[str, object]) -> tuple[object, ...]:
+    return (
+        point["dataset"],
+        point["site_id"],
+        point["name"],
+        point.get("segment_id_2025"),
+        round(float(point["lat"]), 6),
+        round(float(point["lon"]), 6),
+    )
+
+
+def combine_direction_splits(points: list[dict[str, object]]) -> list[dict[str, object]]:
+    grouped: dict[tuple[object, ...], list[dict[str, object]]] = {}
+    passthrough: list[dict[str, object]] = []
+    for point in points:
+        if point.get("match_type") != "direction_split":
+            passthrough.append(point)
+            continue
+        grouped.setdefault(point_key(point), []).append(point)
+
+    combined = passthrough[:]
+    for group in grouped.values():
+        if len(group) == 1:
+            combined.append(group[0])
+            continue
+
+        first = group[0]
+        volume_2024 = sum(float(point["volume_2024"] or 0) for point in group)
+        volume_2025 = sum(float(point["volume_2025"] or 0) for point in group)
+        change = ((volume_2025 - volume_2024) / volume_2024) * 100 if volume_2024 else 0
+        directions = sorted({str(point.get("directions", "")) for point in group if point.get("directions")})
+        combined.append(
+            {
+                **first,
+                "site_id": str(first["site_id"]),
+                "change": round(change, 2),
+                "color": marker_color(change),
+                "volume_2024": round(volume_2024, 2),
+                "volume_2025": round(volume_2025, 2),
+                "directions": ";".join(directions),
+                "combined_count": len(group),
+            }
+        )
+    return combined
+
+
 def load_points() -> list[dict[str, object]]:
     points: list[dict[str, object]] = []
     for source in SOURCES:
@@ -66,9 +112,12 @@ def load_points() -> list[dict[str, object]]:
                         "color": marker_color(change),
                         "volume_2024": vol_2024,
                         "volume_2025": vol_2025,
+                        "match_type": row.get("match_type", ""),
+                        "segment_id_2025": row.get("segment_id_2025", ""),
+                        "directions": row.get("directions_2025", row.get("directions_2024", "")),
                     }
                 )
-    return points
+    return combine_direction_splits(points)
 
 
 def build_html(points: list[dict[str, object]]) -> str:
@@ -122,8 +171,10 @@ def build_html(points: list[dict[str, object]]) -> str:
       const change = Number(point.change).toFixed(1);
       const volume2024 = point.volume_2024 == null ? 'n/a' : Math.round(point.volume_2024).toLocaleString();
       const volume2025 = point.volume_2025 == null ? 'n/a' : Math.round(point.volume_2025).toLocaleString();
+      const directions = point.directions ? `<br><b>Directions:</b> ${{point.directions}}` : '';
+      const combined = point.combined_count ? `<br><b>Combined rows:</b> ${{point.combined_count}}` : '';
       return `<strong>${{point.dataset}} ${{point.site_id}}</strong><br>${{point.name}}<br>` +
-        `<b>Change:</b> ${{change}}%<br><b>2024 volume:</b> ${{volume2024}}<br><b>2025 volume:</b> ${{volume2025}}`;
+        `<b>Change:</b> ${{change}}%<br><b>2024 volume:</b> ${{volume2024}}<br><b>2025 volume:</b> ${{volume2025}}${{directions}}${{combined}}`;
     }}
 
     const overlapGroups = new Map();
@@ -141,8 +192,8 @@ def build_html(points: list[dict[str, object]]) -> str:
         return base;
       }}
 
-      // Spread same-coordinate markers side-by-side on the screen so directional
-      // pairs such as EB/WB counts can both be clicked without changing the data.
+      // Spread same-coordinate markers side-by-side on the screen so unrelated
+      // nearby matches can both be clicked without changing the data.
       const angle = total === 2 ? (index === 0 ? Math.PI : 0) : (2 * Math.PI * index) / total;
       const offsetMeters = 10;
       const earthRadiusMeters = 6378137;
