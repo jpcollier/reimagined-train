@@ -57,7 +57,16 @@ MERGE_DISTANCE_M = 60
 # total volume, otherwise the two records measure different traffic.
 MIN_STREAM_COVERAGE = 0.30
 
-DIRECTION_TOKEN = re.compile(r"\b(?:NB|SB|EB|WB)\b", re.IGNORECASE)
+DIRECTION_TOKEN = re.compile(r"\b(?:N\s*B|S\s*B|E\s*B|W\s*B|NB|SB|EB|WB)\b", re.IGNORECASE)
+SOURCE_PREFIX_RE = re.compile(r"^\s*(?:(?:\d+\s*[_-]\s*)?(?:NN\s*[_-]\s*)?(?:ATR|VTMC)\s*[_-]+)+", re.IGNORECASE)
+ACRONYM_REPLACEMENTS = {
+    "fdr": "FDR",
+    "lie": "LIE",
+    "bqe": "BQE",
+    "cpw": "CPW",
+    "ny-440": "NY-440",
+    "ny 440": "NY-440",
+}
 
 
 def norm(s: object) -> str:
@@ -89,20 +98,38 @@ def strip_direction(s: object) -> str:
     return re.sub(r"\s+", " ", text).strip(" -")
 
 
-def display_label(location_1: object, location_2: object) -> str:
-    text = f"{'' if pd.isna(location_1) else location_1} at {'' if pd.isna(location_2) else location_2}"
-    text = text.replace("_", " ")
-    text = re.sub(r"^\s*\d+\s*[- ]\s*", "", text)
+def clean_location_label(label: object, *, strip_directions: bool = True) -> str:
+    """Clean source-system artifacts from a location without comparing direction."""
+    text = "" if pd.isna(label) else str(label)
+    text = SOURCE_PREFIX_RE.sub("", text)
+    text = re.sub(r"^\s*\d+\s*[-_]\s*", "", text)
+    text = re.sub(r"[_]+", " ", text)
+    text = re.sub(r"\s*#\s*\d+\s*$", "", text)
     text = re.sub(r"\bTUES?\b|\bWED\b|\bTHURS?\b|\bSAT\b|\bSUN\b", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bNY\s*[- ]\s*440\b", "NY-440", text, flags=re.IGNORECASE)
+    for acronym in ("FDR", "LIE", "BQE", "CPW"):
+        # Remove repeated abbreviation artifacts such as "LIE Lie".
+        text = re.sub(rf"\b{acronym}\b\s+\b{acronym}\b", acronym, text, flags=re.IGNORECASE)
+    if strip_directions:
+        text = DIRECTION_TOKEN.sub(" ", text)
     text = re.sub(r"\s*[-/]\s*$", "", text)
     text = re.sub(r"\s+", " ", text).strip(" -")
     titled = text.title()
     titled = re.sub(r"(\d+)(St|Nd|Rd|Th)\b", lambda m: m.group(1) + m.group(2).lower(), titled)
-    replacements = {" Eb": " EB", " Wb": " WB", " Nb": " NB", " Sb": " SB", " At ": " at "}
     padded = f" {titled} "
-    for old, new in replacements.items():
+    for source, target in ACRONYM_REPLACEMENTS.items():
+        padded = re.sub(rf"(?<![A-Za-z0-9-]){re.escape(source)}(?![A-Za-z0-9-])", target, padded, flags=re.IGNORECASE)
+    if not strip_directions:
+        padded = DIRECTION_TOKEN.sub(lambda m: m.group(0).replace(" ", "").upper(), padded)
+    for old, new in {" At ": " at ", " And ": " and ", " Between ": " between "}.items():
         padded = padded.replace(old, new)
     return re.sub(r"\s+", " ", padded).strip()
+
+
+def display_label(location_1: object, location_2: object) -> str:
+    left = clean_location_label(location_1, strip_directions=True)
+    right = clean_location_label(location_2, strip_directions=True)
+    return clean_location_label(f"{left} at {right}", strip_directions=True)
 
 
 def haversine_m(lat1, lon1, lat2, lon2):
