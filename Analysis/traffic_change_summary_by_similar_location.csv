@@ -1,0 +1,51 @@
+source,location_group,count_locations,midweek_avg_daily_volume_2024,midweek_avg_daily_volume_2025,percent_change_2024_2025,example_locations
+ATR,1 Avenue,3,37552.7,30646.2,-18.4,1 Avenue between Stanton St and E Houston St; 1 Avenue between E 13th St and E 14th St
+ATR,2 Avenue,1,24946.3,20519.0,-17.7,2 Avenue between E 14th St and E 15th St
+ATR,65th Street,2,26235.8,24353.8,-7.2,65th Street between 5th Ave and CPW
+ATR,79th Street,2,20080.5,77493.5,285.9,79th Street EB at Riverside Drive
+ATR,8th Avenue,1,15669.7,14426.5,-7.9,8th Avenue between W 41st St and W 42nd St
+ATR,9th Avenue,3,62396.7,62306.7,-0.1,9th Avenue SB between W 42nd St and W 43rd St; 9th Avenue SB between 34th St and 33rd St; 9th Avenue between W 22nd St and 23rd St
+ATR,Borden Ave,1,24652.3,36610.2,48.5,Borden Ave On Ramp at LIE EB 1
+ATR,Canal Street,2,33849.7,33259.3,-1.7,Canal Street EB between Walker St and Mulberry St
+ATR,Columbia Street,2,5335.8,4916.5,-7.9,Columbia Street NB between Rivington St and E Houston St
+ATR,East 34th Street,2,17497.8,15697.3,-10.3,East 34th Street between Lexington Ave and 3rd Ave; East 34th Street WB between 3rd Ave and Lexington Ave
+ATR,East 61 Street,1,5985.0,5536.0,-7.5,East 61 Street between Lexington Ave and 3rd Ave
+ATR,East 63rd Street,1,12481.0,12901.2,3.4,East 63rd Street at York Avenue
+ATR,Ent From Van Dam Street and Van Dam Street,1,1272.3,1074.8,-15.5,Ent From Van Dam Street and Van Dam Street
+ATR,Exit From LIE Lie,1,20866.3,25302.7,21.3,Exit From LIE Lie
+ATR,FDR Drive,5,259035.1,268168.3,3.5,FDR Dr On Ramp at 63rd Street; FDR Dr between Market Slip and Manhattan Bridge; FDR Dr between E Houston Street and E 6th Street NB
+ATR,Ferry Terminal,1,3748.2,3819.8,1.9,Ferry Terminal Exit at Ferry Terminal Viaduct#1
+ATR,Ferry Terminal Viaduct,1,3180.7,3759.8,18.2,Ferry Terminal Viaduct and Richmond Terrace#1
+ATR,Grand Central Parkway BQE,2,205124.8,193471.8,-5.7,Grand Central Parkway WB BQE; Grand Central Parkway EB BQE
+ATR,Henry Hudson Parkway Ramp,1,61267.3,56323.3,-8.1,Henry Hudson Parkway Ramp
+ATR,Henry Hudson Parkway Ramp 1,1,65367.3,66947.7,2.4,Henry Hudson Parkway Ramp 1
+ATR,Major Deegan Depot Place,2,92438.7,88610.2,-4.1,Major Deegan Depot Place NB
+ATR,Queen Midtown Tunnel,2,8903.8,10254.0,15.2,Queen Midtown Tunnel Entrance at 21st Street; Queen Midtown Tunnel Entrance at 50th Avenue
+ATR,Queens Blvd,2,27141.3,27936.0,2.9,Queens Blvd between 39th St and 39th Place; Queens Blvd between 38th St and 39th St
+ATR,Route 9A,4,97232.8,136304.3,40.2,9A at 14th Street; 9A at 14th Street SB; 9A between W 42nd St and W 41st St
+ATR,Route 9A & W 42nd Street,1,34940.7,43175.2,23.6,9A & W 42nd Street NB between W 42nd St and W 43rd St
+ATR,Route 9A W. 24th St,1,25932.2,34932.7,34.7,9A W. 24th St and W 26th St
+ATR,West 34th Street,2,16375.3,16291.0,-0.5,West 34th Street EB between 8th Ave and 9th Ave; West 34th Street WB between 8th Ave and 9th Ave
+ATR,West 62nd St,2,5279.8,5203.0,-1.5,West 62nd St EB between Amsterdam Ave and Columbus Ave
+ATR,West Houston Street,2,23891.7,29897.5,25.1,West Houston Street between Wooster St and West Broadway; West Houston Street EB between West Broadway and Wooster St
+VTMC,1st Ave,1,21962.0,22387.0,1.9,1st Ave at 13th St
+VTMC,21st St,1,26595.0,29938.0,12.6,21st St at 36th Ave
+VTMC,2nd Ave,1,30960.0,28462.0,-8.1,2nd Ave at 14th St
+VTMC,3rd Ave,3,108594.0,114589.0,5.5,3rd Ave at 57th St; 3rd Ave at 34 St; 3rd Ave at 14th St
+VTMC,6th Ave,1,40330.0,41187.0,2.1,6th Ave at 23rd St
+VTMC,7th Ave,2,55094.0,61508.0,11.6,7th Ave at 57th St; 7th Ave at 14th St
+VTMC,8th Ave,2,49059.0,48864.0,-0.4,8th Ave at 34 St; 8th Ave at 41 St
+VTMC,9th Ave,3,97411.0,93112.0,-4.4,9th Ave at 42 St; 9th Ave at 34 St; 9th Ave at 22nd St
+VTMC,Allen St,1,13157.0,14857.0,12.9,Allen St at Stanton St
+VTMC,Boerum Place,1,40429.0,39909.0,-1.3,Boerum Place at Atlantic Ave
+VTMC,Canal St,1,35552.0,31235.0,-12.1,Canal St at Walker St
+VTMC,Church St,1,26176.0,25650.0,-2.0,Church St at Chamber St
+VTMC,Flatbush Ave,1,58608.0,59127.0,0.9,Flatbush Ave at Atlantic Ave
+VTMC,Flatbush Ave Ext,1,92156.0,88322.0,-4.2,Flatbush Ave Ext at Tillary St
+VTMC,Hicks St,1,29509.0,25127.0,-14.8,Hicks St at Atlantic Ave
+VTMC,Lexington Ave,1,31451.0,32571.0,3.6,Lexington Ave at 42nd St
+VTMC,Steinway St,1,39404.0,41364.0,5.0,Steinway St at Northern Blvd
+VTMC,Thompson Ave,1,39068.0,46200.0,18.3,Thompson Ave at Van Dam St
+VTMC,Union Square,1,26476.0,26144.0,-1.3,Union Square at 15th St
+VTMC,Water St,1,21287.0,21322.0,0.2,Water St at Fulton St
+VTMC,West Broadway,1,29337.0,35456.0,20.9,West Broadway at West Houston St
