@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Match 2023/2024/2025 ATR count locations and compute midweek percent changes.
 
-Midweek is Tuesday, Wednesday, and Thursday. Locations are first matched through
-strict one-to-one same-direction criteria. A second, explicitly flagged
-``direction_split`` pass recovers partner-important sites where 2025 has one
-base id per direction but the historical ATR record is bidirectional; those rows
-use direction-specific historical volumes and are marked for review.
+Midweek is Tuesday, Wednesday, and Thursday. ATR counts are matched at the
+segment/location level: if a location is split into multiple one-direction
+records in a source file, those directions are aggregated before matching and
+before volume changes are calculated.
 """
 from __future__ import annotations
 
@@ -87,6 +86,120 @@ def display_label(label: object) -> str:
     return re.sub(r"\s+", " ", padded).strip()
 
 
+def segment_key(label: object) -> str:
+    """Normalize a street segment label without travel direction.
+
+    The ATR source labels often encode the same physical block as separate
+    directional records (for example EB and WB).  For year-over-year segment
+    volumes, those records should collapse to one undirected street segment.
+    """
+    text = "" if pd.isna(label) else str(label).lower()
+    reps = {
+        " avenue ": " ave ", " street ": " st ", " road ": " rd ",
+        " boulevard ": " blvd ", " expressway ": " expy ",
+        " parkway ": " pkwy ", " drive ": " dr ", " east ": " e ",
+        " west ": " w ", " north ": " n ", " south ": " s ",
+        " btwn ": " between ",
+    }
+    text = re.sub(r"[_,-]", " ", f" {text} ")
+    for a, b in reps.items():
+        text = text.replace(a, b)
+    text = re.sub(r"\b\d+\s*atr\b", " ", text)
+    text = re.sub(r"[^a-z0-9 ]+", " ", text)
+    text = re.sub(r"\b(nb|sb|eb|wb)\b", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    parts = re.split(r"\s+", text)
+    if "between" not in parts:
+        return text
+    idx = parts.index("between")
+    street = " ".join(parts[:idx])
+    endpoints = " ".join(parts[idx + 1:])
+    endpoint_parts = [p.strip() for p in re.split(r"\band\b", endpoints) if p.strip()]
+    if len(endpoint_parts) == 2:
+        endpoints = " and ".join(sorted(endpoint_parts))
+    return f"{street} between {endpoints}".strip()
+
+
+def aggregate_segment_locations(loc: pd.DataFrame, id_col: str) -> pd.DataFrame:
+    """Aggregate same-segment directional location rows into one row."""
+    loc = loc.copy()
+    if "segment_key" not in loc.columns:
+        loc["segment_key"] = loc["label"].map(segment_key)
+
+    def union_directions(values: pd.Series) -> tuple[str, ...]:
+        directions = set()
+        for value in values:
+            directions.update(value)
+        return tuple(sorted(directions))
+
+    id_agg = (id_col, "min") if id_col == "base_id" else (id_col, lambda x: ";".join(map(str, sorted(set(x)))))
+    grouped = (loc.groupby("segment_key", as_index=False)
+        .agg(**{
+            id_col: id_agg,
+            "location_1": ("location_1", "first") if "location_1" in loc.columns else ("label", "first"),
+            "location_2": ("location_2", "first") if "location_2" in loc.columns else ("label", "first"),
+            "segment_id_2025": ("segment_id_2025", "first") if "segment_id_2025" in loc.columns else (id_col, "first"),
+            "base_ids": ("base_ids", lambda x: ";".join(map(str, sorted(set(";".join(map(str, x)).split(";")))))) if "base_ids" in loc.columns else (id_col, lambda x: ";".join(map(str, sorted(set(x))))),
+            "street": ("street", "first") if "street" in loc.columns else ("label", "first"),
+            "fromSt": ("fromSt", "first") if "fromSt" in loc.columns else ("label", "first"),
+            "toSt": ("toSt", "first") if "toSt" in loc.columns else ("label", "first"),
+            "label": ("label", "first"),
+            "latitude": ("latitude", "mean"),
+            "longitude": ("longitude", "mean"),
+            "directions": ("directions", union_directions),
+            "records": ("records", "sum"),
+            "days": ("days", "max"),
+            "hours": ("hours", "max"),
+            "midweek_avg_daily_volume": ("midweek_avg_daily_volume", "sum"),
+            "year": ("year", "first"),
+        }))
+    grouped["direction_count"] = grouped["directions"].map(len)
+    grouped["label"] = grouped["segment_key"]
+    grouped["norm_label"] = grouped["segment_key"]
+    return grouped
+
+
+def aggregate_close_2025_direction_splits(loc: pd.DataFrame) -> pd.DataFrame:
+    """Merge nearby one-way 2025 rows that are the same street counter site."""
+    loc = loc.copy().reset_index(drop=True)
+    parent = list(range(len(loc)))
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def union(i: int, j: int) -> None:
+        ri, rj = find(i), find(j)
+        if ri != rj:
+            parent[rj] = ri
+
+    street_norm = loc["street"].map(norm) if "street" in loc.columns else loc["label"].map(norm)
+    for i, a in loc.iterrows():
+        if int(a.direction_count) != 1:
+            continue
+        for j in range(i + 1, len(loc)):
+            b = loc.iloc[j]
+            if int(b.direction_count) != 1:
+                continue
+            if street_norm.iloc[i] != street_norm.iloc[j]:
+                continue
+            if (a.directions[0], b.directions[0]) not in OPPOSITE_DIRECTIONS:
+                continue
+            if haversine_m(a.latitude, a.longitude, b.latitude, b.longitude) <= CLOSE_DISTANCE_M:
+                union(i, j)
+
+    roots = [find(i) for i in range(len(loc))]
+    loc["close_split_key"] = roots
+    if loc["close_split_key"].nunique() == len(loc):
+        return loc.drop(columns=["close_split_key"])
+    component_sizes = loc["close_split_key"].map(loc["close_split_key"].value_counts())
+    loc["segment_key"] = loc["label"].map(segment_key)
+    loc.loc[component_sizes > 1, "segment_key"] = street_norm[component_sizes > 1]
+    return aggregate_segment_locations(loc, "base_id")
+
+
 def haversine_m(lat1, lon1, lat2, lon2):
     r = 6371000
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -144,6 +257,7 @@ def load_parquet_year(year: int):
     loc["label"] = loc["location_1"] + " " + loc["location_2"]
     loc["norm_label"] = loc["label"].map(norm)
     loc["year"] = year
+    loc = aggregate_segment_locations(loc, "segment_id")
 
     dir_loc = (df.groupby(["segment_id", "direction_of_travel"])
         .agg(location_1=("location_1", "first"), location_2=("location_2", "first"),
@@ -170,25 +284,31 @@ def load_2025():
     df = df[df["Weekday"].isin(MIDWEEK)].copy()
     df = drop_multi_stream_segments(
         df, ["base_id", "Date", "Time", "Direction"], "base_id", 2025)
+    df["location_key"] = (
+        df["SegmentId"].astype(str) + "|" + df["street"].astype(str) + "|" +
+        df["fromSt"].astype(str) + "|" + df["toSt"].astype(str)
+    )
     xy = df["WktGeom"].map(parse_point)
     df["x"] = [p[0] for p in xy]; df["y"] = [p[1] for p in xy]
     transformer = Transformer.from_crs("EPSG:2263", "EPSG:4326", always_xy=True)
     lon, lat = transformer.transform(df["x"].to_numpy(), df["y"].to_numpy())
     df["longitude"] = lon; df["latitude"] = lat
-    loc = (df.groupby("base_id")
-        .agg(segment_id_2025=("SegmentId", "first"), street=("street", "first"), fromSt=("fromSt", "first"), toSt=("toSt", "first"),
+    loc = (df.groupby("location_key")
+        .agg(base_id=("base_id", "min"),
+             base_ids=("base_id", lambda x: ";".join(map(str, sorted(set(x))))),
+             segment_id_2025=("SegmentId", "first"), street=("street", "first"), fromSt=("fromSt", "first"), toSt=("toSt", "first"),
              latitude=("latitude", "mean"), longitude=("longitude", "mean"),
              directions=("Direction", lambda x: tuple(sorted(set(x.dropna())))),
              direction_count=("Direction", lambda x: x.dropna().nunique()),
              records=("Volume", "size"))
         .reset_index())
-    days = df.groupby("base_id").agg(days=("Date", "nunique")).reset_index()
-    hourly_stats = summarize_daily_volume(df, ["base_id"], "Date", "Hour", "Volume")
-    loc = loc.merge(days, on="base_id", how="left").merge(hourly_stats, on="base_id", how="left")
+    days = df.groupby("location_key").agg(days=("Date", "nunique")).reset_index()
+    hourly_stats = summarize_daily_volume(df, ["location_key"], "Date", "Hour", "Volume")
+    loc = loc.merge(days, on="location_key", how="left").merge(hourly_stats, on="location_key", how="left")
     loc["label"] = loc["street"] + " between " + loc["fromSt"] + " and " + loc["toSt"]
     loc["norm_label"] = loc["label"].map(norm)
     loc["year"] = 2025
-    return loc
+    return aggregate_close_2025_direction_splits(aggregate_segment_locations(loc, "base_id"))
 
 
 def score_match(a, b):
@@ -338,6 +458,7 @@ def build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=None, y23_lookup=
     row = {
         "segment_id_2024": m.segment_id_2024,
         "base_id_2025": int(m.base_id_2025),
+        "base_ids_2025": b.base_ids,
         "segment_id_2025": int(b.segment_id_2025),
         "display_name": display_label(location_2024),
         "location_2024": location_2024,
@@ -406,9 +527,12 @@ def write_partner_gap_audit(y24: pd.DataFrame, y25: pd.DataFrame, matched_base_i
     audit_rows = []
     y25_partner = y25.copy()
     y25_partner["SegmentId"] = y25_partner["segment_id_2025"].astype(int)
-    y25_partner["Direction"] = y25_partner["directions"].map(lambda d: d[0] if len(d) == 1 else ";".join(d))
+    y25_partner["Direction"] = y25_partner["directions"].map(lambda d: ";".join(d))
     for _, p in partner_keys.iterrows():
-        possible_2025 = y25_partner[(y25_partner["SegmentId"] == int(p.SegmentId)) & (y25_partner["Direction"] == p.Direction)]
+        possible_2025 = y25_partner[
+            (y25_partner["SegmentId"] == int(p.SegmentId)) &
+            (y25_partner["directions"].map(lambda d: p.Direction in d))
+        ]
         if possible_2025.empty:
             status = "partner_row_not_in_2025_midweek_base"
             audit_rows.append({**p.to_dict(), "match_status": status})
@@ -464,8 +588,6 @@ def main():
     })
 
     used_2025 = set(matches_24_25["base_id_2025"].astype(int)) if not matches_24_25.empty else set()
-    y25_unmatched = y25[~y25["base_id"].astype(int).isin(used_2025)]
-    direction_matches = match_direction_splits(y24_dir, y25_unmatched, partner_priority_keys())
 
     joined = matches_24_25.merge(matches_23_24, on="segment_id_2024", how="left")
     y23_lookup = y23.set_index("segment_id")
@@ -476,8 +598,6 @@ def main():
     rows = []
     for _, m in joined.iterrows():
         rows.append(build_output_row(m, y24_lookup, y25_lookup, y23_lookup=y23_lookup, match_23_24=m))
-    for _, m in direction_matches.iterrows():
-        rows.append(build_output_row(m, y24_lookup, y25_lookup, y24_dir_lookup=y24_dir_lookup, match_type="direction_split"))
 
     out = pd.DataFrame(rows).sort_values(["match_type", "segment_id_2024", "base_id_2025"])
     OUT.mkdir(exist_ok=True)
@@ -486,9 +606,8 @@ def main():
     write_partner_gap_audit(y24, y25, set(out["base_id_2025"].astype(int)))
 
     strict_count = (out["match_type"] == "strict_one_to_one").sum()
-    split_count = (out["match_type"] == "direction_split").sum()
     matched_2023 = out["segment_id_2023"].astype(bool).sum()
-    print(f"Matched {len(out)} 2024-2025 locations: {strict_count} strict and {split_count} direction-split; {matched_2023} include 2023 history")
+    print(f"Matched {len(out)} segment-level 2024-2025 locations: {strict_count} strict; {matched_2023} include 2023 history")
     print(out[["match_type", "segment_id_2023", "segment_id_2024", "base_id_2025", "segment_id_2025", "directions_2024", "directions_2025", "midweek_avg_daily_volume_2023", "midweek_avg_daily_volume_2024", "midweek_avg_daily_volume_2025", "pct_change_2023_2024", "pct_change_2024_2025", "pct_change_2023_2025"]].to_string(index=False))
 
 
