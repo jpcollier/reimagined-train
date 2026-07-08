@@ -66,6 +66,12 @@ def load_points() -> list[dict[str, object]]:
                         "color": marker_color(change),
                         "volume_2024": vol_2024,
                         "volume_2025": vol_2025,
+                        "directions_2024": row.get("directions_2024", ""),
+                        "directions_2025": row.get("directions_2025", ""),
+                        "matched_direction": row.get("matched_direction", ""),
+                        "volume_comparability": row.get("volume_comparability", ""),
+                        "needs_review": row.get("needs_review", ""),
+                        "streams_shared": row.get("streams_shared", ""),
                     }
                 )
     return points
@@ -118,12 +124,45 @@ def build_html(points: list[dict[str, object]]) -> str:
     const bounds = [];
     const layers = {{ ATR: L.layerGroup(), VTMC: L.layerGroup() }};
 
+    function escapeHtml(value) {{
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({{
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }}[char]));
+    }}
+
+    function directionComparison(point) {{
+      const directions2024 = point.directions_2024 || '';
+      const directions2025 = point.directions_2025 || '';
+      if (directions2024 || directions2025) {{
+        return `2024 ${{directions2024 || 'n/a'}} → 2025 ${{directions2025 || 'n/a'}}`;
+      }}
+      if (point.matched_direction) {{
+        return point.matched_direction;
+      }}
+      return 'n/a';
+    }}
+
     function popup(point) {{
       const change = Number(point.change).toFixed(1);
       const volume2024 = point.volume_2024 == null ? 'n/a' : Math.round(point.volume_2024).toLocaleString();
       const volume2025 = point.volume_2025 == null ? 'n/a' : Math.round(point.volume_2025).toLocaleString();
-      return `<strong>${{point.dataset}} ${{point.site_id}}</strong><br>${{point.name}}<br>` +
-        `<b>Change:</b> ${{change}}%<br><b>2024 volume:</b> ${{volume2024}}<br><b>2025 volume:</b> ${{volume2025}}`;
+      const comparability = point.volume_comparability || '';
+      const needsReview = String(point.needs_review || '').toUpperCase() === 'TRUE';
+      const hasWarning = needsReview || comparability === 'direction_methodology_mismatch';
+      const streamLine = point.streams_shared ? `<br><b>Shared streams:</b> ${{escapeHtml(point.streams_shared)}}` : '';
+      const warningLine = hasWarning
+        ? `<br><b>Review warning:</b> ${{needsReview ? 'Needs review' : 'Check comparability'}}${{comparability ? ` (${{escapeHtml(comparability)}})` : ''}}`
+        : '';
+      return `<strong>${{escapeHtml(point.dataset)}} ${{escapeHtml(point.site_id)}}</strong><br>` +
+        `<b>Location:</b> ${{escapeHtml(point.name)}}<br>` +
+        `<b>Direction:</b> ${{escapeHtml(directionComparison(point))}}<br>` +
+        `<b>Change:</b> ${{change}}%<br>` +
+        `<b>2024 volume:</b> ${{volume2024}}<br>` +
+        `<b>2025 volume:</b> ${{volume2025}}${{streamLine}}${{warningLine}}`;
     }}
 
     const overlapGroups = new Map();
