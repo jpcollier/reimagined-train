@@ -35,6 +35,17 @@ OPPOSITE_DIRECTIONS = {
     ("EB", "WB"), ("WB", "EB"),
 }
 
+SOURCE_PREFIX_RE = re.compile(r"^\s*(?:(?:\d+\s*[_-]\s*)?(?:NN\s*[_-]\s*)?(?:ATR|VTMC)\s*[_-]+)+", re.IGNORECASE)
+DIRECTION_TOKEN_RE = re.compile(r"\b(?:N\s*B|S\s*B|E\s*B|W\s*B|NB|SB|EB|WB)\b", re.IGNORECASE)
+ACRONYM_REPLACEMENTS = {
+    "fdr": "FDR",
+    "lie": "LIE",
+    "bqe": "BQE",
+    "cpw": "CPW",
+    "ny-440": "NY-440",
+    "ny 440": "NY-440",
+}
+
 
 def directions_compatible(left_direction: str, right_direction: str) -> bool:
     """Return whether differently named directions can describe the same count stream.
@@ -65,6 +76,37 @@ def norm(s: object) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def clean_location_label(label: object, *, strip_directions: bool = True) -> str:
+    """Clean source-system artifacts from a location without comparing direction."""
+    text = "" if pd.isna(label) else str(label)
+    text = SOURCE_PREFIX_RE.sub("", text)
+    text = re.sub(r"^\s*\d+\s*_\s*ATR\s*_?", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"[_]+", " ", text)
+    text = re.sub(r"\s*#\s*\d+\s*$", "", text)
+    text = re.sub(r"\bBtwn\b", "between", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bNY\s*[- ]\s*440\b", "NY-440", text, flags=re.IGNORECASE)
+    for acronym in ("FDR", "LIE", "BQE", "CPW"):
+        # Remove repeated abbreviation artifacts such as "LIE Lie".
+        text = re.sub(rf"\b{acronym}\b\s+\b{acronym}\b", acronym, text, flags=re.IGNORECASE)
+    if strip_directions:
+        text = DIRECTION_TOKEN_RE.sub(" ", text)
+    text = re.sub(r"\s+", " ", text).strip(" -")
+    titled = text.title()
+    titled = re.sub(r"(\d+)(St|Nd|Rd|Th)\b", lambda m: m.group(1) + m.group(2).lower(), titled)
+    padded = f" {titled} "
+    for source, target in ACRONYM_REPLACEMENTS.items():
+        padded = re.sub(rf"(?<![A-Za-z0-9-]){re.escape(source)}(?![A-Za-z0-9-])", target, padded, flags=re.IGNORECASE)
+    if not strip_directions:
+        padded = DIRECTION_TOKEN_RE.sub(lambda m: m.group(0).replace(" ", "").upper(), padded)
+    replacements = {
+        " M.L.K.": " M.L.K.", " W ": " W ", " E ": " E ",
+        " Between ": " between ", " And ": " and ", " At ": " at ",
+    }
+    for old, new in replacements.items():
+        padded = padded.replace(old, new)
+    return re.sub(r"\s+", " ", padded).strip()
+
+
 def display_label(label: object) -> str:
     """Create a compact human-readable location label for tables.
 
@@ -73,24 +115,7 @@ def display_label(label: object) -> str:
     Display labels should keep the location clean so direction information can
     be added from the dedicated direction columns instead of parsed from text.
     """
-    text = "" if pd.isna(label) else str(label)
-    text = re.sub(r"^\s*\d+\s*_\s*ATR\s*_?", "", text, flags=re.IGNORECASE)
-    text = text.replace("_", " ")
-    text = re.sub(r"\bBtwn\b", "between", text, flags=re.IGNORECASE)
-    text = re.sub(r"\b(?:NB|SB|EB|WB)\b", " ", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s+", " ", text).strip(" -")
-    titled = text.title()
-    titled = re.sub(r"(\d+)(St|Nd|Rd|Th)\b", lambda m: m.group(1) + m.group(2).lower(), titled)
-    replacements = {
-        " Fdr ": " FDR ", "Fdr ": "FDR ", " Lie ": " LIE ",
-        " Bqe": " BQE", " Cpw": " CPW", " Ny-440": " NY-440",
-        " M.L.K.": " M.L.K.", " W ": " W ", " E ": " E ",
-        " Between ": " between ", " And ": " and ", " At ": " at ",
-    }
-    padded = f" {titled} "
-    for old, new in replacements.items():
-        padded = padded.replace(old, new)
-    return re.sub(r"\s+", " ", padded).strip()
+    return clean_location_label(label, strip_directions=True)
 
 
 def format_direction_pair(directions_2024: object, directions_2025: object) -> str:
@@ -106,7 +131,7 @@ def format_direction_pair(directions_2024: object, directions_2025: object) -> s
                 if pd.isna(value):
                     return []
                 parts = [value]
-        return [str(part).strip().upper() for part in parts if str(part).strip()]
+        return [re.sub(r"\s+", "", str(part).strip().upper()) for part in parts if str(part).strip()]
 
     left = normalize(directions_2024)
     right = normalize(directions_2025)
